@@ -24,40 +24,27 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import { ElMessage } from 'element-plus';
-import apiClient from '../../services/api'; // Assuming you'll use this for actual API calls
+import { authService } from '../../services/auth'; // 导入实际的认证服务
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const form = reactive({
-    username: 'admin', // Default for easy testing
-    password: 'adminpass' // Default for easy testing
+    username: 'admin@example.com', // 假设后端登录使用邮箱或用户名
+    password: 'adminpass'
 });
 
 const handleLogin = async () => {
     try {
-        // In a real application, replace this mock login with an actual API call:
-        // const response = await apiClient.post('/auth/login', { username: form.username, password: form.password });
-        // const { access_token, user_info } = response.data; // Adjust based on your backend response structure
-        // authStore.login(access_token, user_info);
-
-        // Mock login logic:
-        if (form.username === 'admin' && form.password === 'adminpass') {
-            const mockToken = 'mock_admin_jwt_token';
-            const mockUser = { id: 1, username: 'admin', email: 'admin@example.com', is_superuser: true, is_active: true };
-            authStore.login(mockToken, mockUser);
-            router.push('/dashboard');
-        } else if (form.username === 'user1' && form.password === 'userpass') {
-            const mockToken = 'mock_user_jwt_token';
-            const mockUser = { id: 2, username: 'user1', email: 'user1@example.com', is_superuser: false, is_active: true };
-            authStore.login(mockToken, mockUser);
-            router.push('/dashboard');
-        } else {
-            ElMessage.error('用户名或密码错误！');
-        }
+        const response = await authService.login(form.username, form.password);
+        // 假设后端返回的数据结构包含 access_token 和 user 字段
+        // 您可能需要根据您的后端实际响应调整 response.user 的结构
+        authStore.login(response.access_token, response.user);
+        router.push('/dashboard');
     } catch (error) {
-        // Error handling is already in apiClient interceptors, but can add specific login error handling here if needed.
-        console.error('Login error:', error);
+        // 错误处理已在 apiClient 拦截器中，这里可以添加更具体的登录失败提示
+        console.error('登录失败:', error);
+        // ElMessage.error('登录失败，请检查用户名或密码。'); // 如果拦截器没有足够详细的错误信息
     }
 };
 </script>

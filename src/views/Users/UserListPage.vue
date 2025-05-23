@@ -34,25 +34,17 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { userService } from '../../services/users'; // 导入实际的用户服务
 
 const router = useRouter();
 const users = ref([]);
 
-// Mock users data (replace with actual API calls)
-const mockUsers = [
-    { id: 1, username: 'admin', email: 'admin@example.com', full_name: '管理员', is_active: true, is_superuser: true, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-    { id: 2, username: 'user1', email: 'user1@example.com', full_name: '普通用户1', is_active: true, is_superuser: false, created_at: '2023-02-01T00:00:00Z', updated_at: '2023-02-01T00:00:00Z' },
-    { id: 3, username: 'user2', email: 'user2@example.com', full_name: '普通用户2', is_active: false, is_superuser: false, created_at: '2023-03-01T00:00:00Z', updated_at: '2023-03-01T00:00:00Z' },
-];
-
 const fetchUsers = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/users');
-        // users.value = response.data;
-        users.value = mockUsers; // Using mock data
+        const data = await userService.getUsers(); // 调用实际的 API 服务
+        users.value = data;
     } catch (error) {
-        console.error("Failed to fetch users:", error);
+        console.error("获取用户列表失败:", error);
     }
 };
 
@@ -63,15 +55,11 @@ const deleteUser = async (id) => {
         type: 'warning',
     }).then(async () => {
         try {
-            // In a real app: await apiClient.delete(`/users/${id}`);
-            const index = mockUsers.findIndex(u => u.id === id);
-            if (index !== -1) {
-                mockUsers.splice(index, 1); // Remove from mock data
-            }
+            await userService.deleteUser(id); // 调用实际的 API 服务
             ElMessage.success('用户删除成功！');
-            fetchUsers(); // Refresh list
+            fetchUsers(); // 刷新列表
         } catch (error) {
-            console.error("Failed to delete user:", error);
+            console.error("删除用户失败:", error);
         }
     }).catch(() => {
         ElMessage.info('已取消删除。');

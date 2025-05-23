@@ -33,24 +33,17 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { newsService } from '../../services/news'; // 导入实际的新闻服务
 
 const router = useRouter();
 const news = ref([]);
 
-// Mock news data (replace with actual API calls)
-const mockNews = [
-    { id: 1, title: '新闻标题1', slug: 'news-title-1', summary: '这是新闻1的摘要', content: '新闻1的详细内容...', author_id: 1, category_id: 1, status: 'published', published_at: '2023-03-01T10:00:00Z', view_count: 120, created_at: '2023-03-01T09:00:00Z', updated_at: '2023-03-01T10:00:00Z', author: { id: 1, username: 'admin' }, category: { id: 1, name: '分类A' }, tags: [{ id: 1, name: '科技' }] },
-    { id: 2, title: '新闻标题2', slug: 'news-title-2', summary: '这是新闻2的摘要', content: '新闻2的详细内容...', author_id: 2, category_id: 2, status: 'draft', published_at: null, view_count: 50, created_at: '2023-03-05T11:00:00Z', updated_at: '2023-03-05T11:00:00Z', author: { id: 2, username: 'user1' }, category: { id: 2, name: '体育' }, tags: [{ id: 2, name: '足球' }] },
-];
-
 const fetchNews = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/news');
-        // news.value = response.data;
-        news.value = mockNews; // Using mock data
+        const data = await newsService.getNews(); // 调用实际的 API 服务
+        news.value = data;
     } catch (error) {
-        console.error("Failed to fetch news:", error);
+        console.error("获取新闻列表失败:", error);
     }
 };
 
@@ -61,15 +54,11 @@ const deleteNews = async (id) => {
         type: 'warning',
     }).then(async () => {
         try {
-            // In a real app: await apiClient.delete(`/news/${id}`);
-            const index = mockNews.findIndex(n => n.id === id);
-            if (index !== -1) {
-                mockNews.splice(index, 1); // Remove from mock data
-            }
+            await newsService.deleteNews(id); // 调用实际的 API 服务
             ElMessage.success('新闻删除成功！');
-            fetchNews(); // Refresh list
+            fetchNews(); // 刷新列表
         } catch (error) {
-            console.error("Failed to delete news:", error);
+            console.error("删除新闻失败:", error);
         }
     }).catch(() => {
         ElMessage.info('已取消删除。');
