@@ -20,18 +20,18 @@
 </template>
 
 <script setup>
-import { reactive, nextTick } from 'vue'; // 导入 nextTick
+import { reactive, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
-import { ElMessage } from 'element-plus';
-import { authService } from '../../services/auth'; // 导入实际的认证服务
+// ElMessage 不再在此处直接调用 success 消息
+import { authService } from '../../services/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const form = reactive({
-    username: 'admin@example.com', // 假设后端登录使用邮箱或用户名
-    password: 'adminpass'
+    username: '', // 假设后端登录使用邮箱或用户名
+    password: ''
 });
 
 const handleLogin = async () => {
@@ -40,7 +40,7 @@ const handleLogin = async () => {
         // 假设后端返回的数据结构包含 access_token 和 user 字段
         authStore.login(response.access_token, response.user);
         
-        ElMessage.success('登录成功！');
+        // 移除此处重复的 ElMessage.success('登录成功！'); 调用，因为它已在 authStore.login 中处理。
 
         // 使用 nextTick 确保 Pinia 状态更新和 localStorage 写入完成后，
         // 再触发路由跳转，给 navigation guard 足够的时间来读取最新的状态。
@@ -50,7 +50,7 @@ const handleLogin = async () => {
     } catch (error) {
         // 错误处理已在 apiClient 拦截器中，这里可以添加更具体的登录失败提示
         console.error('登录失败:', error);
-        // ElMessage.error('登录失败，请检查用户名或密码。'); // 如果拦截器没有足够详细的错误信息
+        // 如果需要，可以在这里添加 ElMessage.error('登录失败，请检查用户名或密码。');
     }
 };
 </script>

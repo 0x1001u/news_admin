@@ -119,9 +119,6 @@ const routes = [
                 component: CommentListPage,
                 meta: { requiresAuth: true }
             },
-            // Note: CommentDetailPage is not explicitly listed in core functions,
-            // but if needed, it would follow a similar pattern:
-            // { path: 'comments/:id', name: 'CommentDetail', component: CommentDetailPage, props: true, meta: { requiresAuth: true } },
         ]
     },
     // Catch-all route for 404
@@ -139,22 +136,26 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
-    const isAuthenticated = authStore.isAuthenticated;
-    const isAdmin = authStore.isAdmin;
+    // 直接从 localStorage 获取 token，以确保获取到最新状态，避免时序问题
+    const tokenInLocalStorage = localStorage.getItem('jwt_token');
+    // isAuthenticated 的判断现在更依赖于 localStorage 的实际内容
+    const isAuthenticated = !!tokenInLocalStorage && !!authStore.user;
+    const isAdmin = authStore.isAdmin; // isAdmin 仍依赖 authStore.user
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        // If route requires auth and user is not authenticated, redirect to login
+        // 如果路由需要认证但用户未认证，则重定向到登录页
         ElMessage.warning('请先登录以访问此页面。');
         next('/login');
     } else if (to.meta.requiresAdmin && !isAdmin) {
-        // If route requires admin and user is not admin, redirect to dashboard
+        // 如果路由需要管理员权限但用户不是管理员，则重定向到仪表盘
         ElMessage.warning('您没有权限访问此页面。');
         next('/dashboard');
     } else if (to.meta.hideForAuth && isAuthenticated) {
-        // If route should be hidden for authenticated users (like login page), redirect to dashboard
+        // 如果路由在认证用户下应隐藏（如登录页），则重定向到仪表盘
         next('/dashboard');
     } else {
-        next(); // Proceed to the route
+        // 否则，正常进行导航
+        next();
     }
 });
 
