@@ -137,16 +137,17 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
     
-    // 直接从 localStorage 获取 token 和 user_info，以确保获取到最新状态，避免时序问题
+    // 1. 直接从 localStorage 获取最新数据
     const tokenInLocalStorage = localStorage.getItem('jwt_token');
     const userInLocalStorageRaw = localStorage.getItem('user_info');
     let userInLocalStorage = null;
+
     try {
         if (userInLocalStorageRaw && userInLocalStorageRaw !== 'undefined') {
             userInLocalStorage = JSON.parse(userInLocalStorageRaw);
         }
     } catch (e) {
-        console.error("Error parsing user_info from localStorage:", e);
+        console.error("Error parsing user_info from localStorage in router guard:", e);
         // 如果解析失败，清除本地存储以避免持续错误
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('user_info');
@@ -156,11 +157,23 @@ router.beforeEach((to, from, next) => {
         return next('/login');
     }
 
-    // isAuthenticated 的判断现在完全依赖于 localStorage 的实际内容
-    const isAuthenticated = !!tokenInLocalStorage && !!userInLocalStorage;
-    
-    // isAdmin 的判断也依赖于从 localStorage 获取到的 user 对象
-    const isAdmin = isAuthenticated && userInLocalStorage && userInLocalStorage.is_superuser;
+    // 2. 强制 Pinia Store 的状态与 localStorage 同步
+    // 只有当 Pinia Store 的 token 与 localStorage 不一致时才更新
+    if (authStore.token !== tokenInLocalStorage) {
+        authStore.setToken(tokenInLocalStorage);
+    }
+    // 只有当 Pinia Store 的 user 与 localStorage 不一致时才更新
+    // 并且确保 userInLocalStorage 是一个有效对象，避免 JSON.stringify(null) != JSON.stringify(undefined) 的问题
+    if (tokenInLocalStorage && userInLocalStorage && JSON.stringify(authStore.user) !== JSON.stringify(userInLocalStorage)) {
+        authStore.setUser(userInLocalStorage);
+    } else if (!tokenInLocalStorage && authStore.user) { // 如果 token 不存在但 store 中有 user，则清除 user
+        authStore.setUser(null);
+    }
+
+
+    // 3. 现在，依赖 authStore 的 getter 来判断认证状态，它们现在保证是同步的
+    const isAuthenticated = authStore.isAuthenticated; // 这个 getter 会使用更新后的 'token' 和 'user'
+    const isAdmin = authStore.isAdmin; // isAdmin 也依赖 authStore 中同步的 user
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         // 如果路由需要认证但用户未认证，则重定向到登录页
