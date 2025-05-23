@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, nextTick } from 'vue'; // 导入 nextTick
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import { ElMessage } from 'element-plus';
@@ -38,9 +38,15 @@ const handleLogin = async () => {
     try {
         const response = await authService.login(form.username, form.password);
         // 假设后端返回的数据结构包含 access_token 和 user 字段
-        // 您可能需要根据您的后端实际响应调整 response.user 的结构
         authStore.login(response.access_token, response.user);
+        
+        ElMessage.success('登录成功！');
+
+        // 使用 nextTick 确保 Pinia 状态更新和 localStorage 写入完成后，
+        // 再触发路由跳转，给 navigation guard 足够的时间来读取最新的状态。
+        await nextTick(); 
         router.push('/dashboard');
+
     } catch (error) {
         // 错误处理已在 apiClient 拦截器中，这里可以添加更具体的登录失败提示
         console.error('登录失败:', error);
