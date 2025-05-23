@@ -136,11 +136,31 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
-    // 直接从 localStorage 获取 token，以确保获取到最新状态，避免时序问题
+    
+    // 直接从 localStorage 获取 token 和 user_info，以确保获取到最新状态，避免时序问题
     const tokenInLocalStorage = localStorage.getItem('jwt_token');
-    // isAuthenticated 的判断现在更依赖于 localStorage 的实际内容
-    const isAuthenticated = !!tokenInLocalStorage && !!authStore.user;
-    const isAdmin = authStore.isAdmin; // isAdmin 仍依赖 authStore.user
+    const userInLocalStorageRaw = localStorage.getItem('user_info');
+    let userInLocalStorage = null;
+    try {
+        if (userInLocalStorageRaw && userInLocalStorageRaw !== 'undefined') {
+            userInLocalStorage = JSON.parse(userInLocalStorageRaw);
+        }
+    } catch (e) {
+        console.error("Error parsing user_info from localStorage:", e);
+        // 如果解析失败，清除本地存储以避免持续错误
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_info');
+        // 确保 authStore 状态也同步清除
+        authStore.logout(); // 调用 logout 会触发路由跳转到 /login
+        ElMessage.error('认证信息已损坏，请重新登录。');
+        return next('/login');
+    }
+
+    // isAuthenticated 的判断现在完全依赖于 localStorage 的实际内容
+    const isAuthenticated = !!tokenInLocalStorage && !!userInLocalStorage;
+    
+    // isAdmin 的判断也依赖于从 localStorage 获取到的 user 对象
+    const isAdmin = isAuthenticated && userInLocalStorage && userInLocalStorage.is_superuser;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         // 如果路由需要认证但用户未认证，则重定向到登录页
