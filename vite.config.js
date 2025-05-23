@@ -1,27 +1,28 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import path from 'path'; // Import path module
+// 不再需要 path 模块，因为我们将使用相对路径
+// import path from 'path';
 
 export default defineConfig({
-    // Explicitly set the project root. This tells Vite where to look for 'public' and 'src'.
-    // Since package.json and vite.config.js are at the repo root, and public/ is directly under it,
-    // the root is the current working directory, represented by process.cwd() or simply '.'
+    // 显式设置项目根目录为当前目录
+    // 这告诉 Vite 在哪里寻找 'public' 和 'src' 文件夹
     root: '.',
     plugins: [vue()],
     build: {
-        // Explicitly define the entry point for Rollup (Vite's underlying bundler).
-        // This ensures Vite knows exactly which HTML file is the main entry.
+        // 显式定义 Rollup 的入口文件。
+        // 对于单页应用，通常 'public/index.html' 是入口。
+        // 使用相对于 'root' 的路径，这里是 '.'
         rollupOptions: {
-            input: path.resolve(__dirname, 'public/index.html'),
+            input: 'public/index.html', // 直接指定相对路径
         },
-        // Set the output directory for the build artifacts
+        // 设置构建输出目录
         outDir: 'dist',
     },
-    // Optional: Configure server for proxying API requests during development
+    // 可选：配置开发服务器的 API 代理
     // server: {
     //     proxy: {
     //         '/api': {
-    //             target: 'http://localhost:8000', // Your backend API address
+    //             target: 'http://localhost:8000', // 您的后端 API 地址
     //             changeOrigin: true,
     //             rewrite: (path) => path.replace(/^\/api/, '/api'),
     //         },
