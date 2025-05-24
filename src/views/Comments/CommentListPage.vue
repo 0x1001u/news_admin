@@ -25,24 +25,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { commentService } from '../../services/comments'; // 导入实际的评论服务
 
 const comments = ref([]);
 
-// Mock comments data (replace with actual API calls)
-const mockComments = [
-    { id: 1, news_id: 1, user_id: 2, content: '评论1内容', parent_comment_id: null, created_at: '2023-03-02T12:00:00Z', updated_at: '2023-03-02T12:00:00Z', user: { id: 2, username: 'user1' }, replies: [] },
-    { id: 2, news_id: 1, user_id: 1, content: '回复评论1', parent_comment_id: 1, created_at: '2023-03-02T13:00:00Z', updated_at: '2023-03-02T13:00:00Z', user: { id: 1, username: 'admin' }, replies: [] },
-    { id: 3, news_id: 2, user_id: 2, content: '评论2内容', parent_comment_id: null, created_at: '2023-03-03T14:00:00Z', updated_at: '2023-03-03T14:00:00Z', user: { id: 2, username: 'user1' }, replies: [] },
-];
-
 const fetchComments = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/comments');
-        // comments.value = response.data;
-        comments.value = mockComments; // Using mock data
+        const data = await commentService.getComments(); // 调用实际的 API 服务
+        comments.value = data;
     } catch (error) {
-        console.error("Failed to fetch comments:", error);
+        console.error("获取评论列表失败:", error);
+        ElMessage.error('获取评论数据失败。');
     }
 };
 
@@ -53,15 +46,12 @@ const deleteComment = async (id) => {
         type: 'warning',
     }).then(async () => {
         try {
-            // In a real app: await apiClient.delete(`/comments/${id}`);
-            const index = mockComments.findIndex(c => c.id === id);
-            if (index !== -1) {
-                mockComments.splice(index, 1); // Remove from mock data
-            }
+            await commentService.deleteComment(id); // 调用实际的 API 服务
             ElMessage.success('评论删除成功！');
-            fetchComments(); // Refresh list
+            fetchComments(); // 刷新列表
         } catch (error) {
-            console.error("Failed to delete comment:", error);
+            console.error("删除评论失败:", error);
+            ElMessage.error('删除评论失败。');
         }
     }).catch(() => {
         ElMessage.info('已取消删除。');

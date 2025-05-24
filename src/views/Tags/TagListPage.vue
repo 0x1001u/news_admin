@@ -20,25 +20,18 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { tagService } from '../../services/tags'; // 导入实际的标签服务
 
 const router = useRouter();
 const tags = ref([]);
 
-// Mock tags data (replace with actual API calls)
-const mockTags = [
-    { id: 1, name: '科技', slug: 'tech', created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-    { id: 2, name: '足球', slug: 'football', created_at: '2023-01-02T00:00:00Z', updated_at: '2023-01-02T00:00:00Z' },
-    { id: 3, name: '娱乐', slug: 'entertainment', created_at: '2023-01-03T00:00:00Z', updated_at: '2023-01-03T00:00:00Z' },
-];
-
 const fetchTags = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/tags');
-        // tags.value = response.data;
-        tags.value = mockTags; // Using mock data
+        const data = await tagService.getTags(); // 调用实际的 API 服务
+        tags.value = data;
     } catch (error) {
-        console.error("Failed to fetch tags:", error);
+        console.error("获取标签列表失败:", error);
+        ElMessage.error('获取标签数据失败。');
     }
 };
 
@@ -49,15 +42,12 @@ const deleteTag = async (id) => {
         type: 'warning',
     }).then(async () => {
         try {
-            // In a real app: await apiClient.delete(`/tags/${id}`);
-            const index = mockTags.findIndex(t => t.id === id);
-            if (index !== -1) {
-                mockTags.splice(index, 1); // Remove from mock data
-            }
+            await tagService.deleteTag(id); // 调用实际的 API 服务
             ElMessage.success('标签删除成功！');
-            fetchTags(); // Refresh list
+            fetchTags(); // 刷新列表
         } catch (error) {
-            console.error("Failed to delete tag:", error);
+            console.error("删除标签失败:", error);
+            ElMessage.error('删除标签失败。');
         }
     }).catch(() => {
         ElMessage.info('已取消删除。');

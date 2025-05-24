@@ -23,25 +23,18 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { categoryService } from '../../services/categories'; // 导入实际的分类服务
 
 const router = useRouter();
 const categories = ref([]);
 
-// Mock categories data (replace with actual API calls)
-const mockCategories = [
-    { id: 1, name: '分类A', slug: 'category-a', description: '描述A', parent_id: null, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-    { id: 2, name: '分类B', slug: 'category-b', description: '描述B', parent_id: null, created_at: '2023-01-02T00:00:00Z', updated_at: '2023-01-02T00:00:00Z' },
-    { id: 3, name: '子分类A1', slug: 'sub-category-a1', description: '描述A1', parent_id: 1, created_at: '2023-01-03T00:00:00Z', updated_at: '2023-01-03T00:00:00Z' },
-];
-
 const fetchCategories = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/categories');
-        // categories.value = response.data;
-        categories.value = mockCategories; // Using mock data
+        const data = await categoryService.getCategories(); // 调用实际的 API 服务
+        categories.value = data;
     } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error("获取分类列表失败:", error);
+        ElMessage.error('获取分类数据失败。');
     }
 };
 
@@ -52,15 +45,12 @@ const deleteCategory = async (id) => {
         type: 'warning',
     }).then(async () => {
         try {
-            // In a real app: await apiClient.delete(`/categories/${id}`);
-            const index = mockCategories.findIndex(c => c.id === id);
-            if (index !== -1) {
-                mockCategories.splice(index, 1); // Remove from mock data
-            }
+            await categoryService.deleteCategory(id); // 调用实际的 API 服务
             ElMessage.success('分类删除成功！');
-            fetchCategories(); // Refresh list
+            fetchCategories(); // 刷新列表
         } catch (error) {
-            console.error("Failed to delete category:", error);
+            console.error("删除分类失败:", error);
+            ElMessage.error('删除分类失败。');
         }
     }).catch(() => {
         ElMessage.info('已取消删除。');

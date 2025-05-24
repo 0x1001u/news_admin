@@ -26,9 +26,9 @@
 
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } => 'vue-router';
 import { ElMessage } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+import { categoryService } from '../../services/categories'; // 导入实际的分类服务
 
 const route = useRoute();
 const router = useRouter();
@@ -42,38 +42,25 @@ const categoryForm = reactive({
 });
 const allCategories = ref([]); // Store all categories to filter for parent selection
 
-// Mock categories data
-const mockCategories = [
-    { id: 1, name: '分类A', slug: 'category-a', description: '描述A', parent_id: null, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-    { id: 2, name: '分类B', slug: 'category-b', description: '描述B', parent_id: null, created_at: '2023-01-02T00:00:00Z', updated_at: '2023-01-02T00:00:00Z' },
-    { id: 3, name: '子分类A1', slug: 'sub-category-a1', description: '描述A1', parent_id: 1, created_at: '2023-01-03T00:00:00Z', updated_at: '2023-01-03T00:00:00Z' },
-];
-
 const fetchCategories = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/categories');
-        // allCategories.value = response.data;
-        allCategories.value = mockCategories; // Using mock data
+        const data = await categoryService.getCategories(); // 调用实际的 API 服务
+        allCategories.value = data;
     } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error("Failed to fetch categories for parent selection:", error);
+        ElMessage.error('获取父分类数据失败。');
     }
 };
 
 const fetchCategoryDetail = async () => {
     if (id.value) {
         try {
-            // In a real app: const response = await apiClient.get(`/categories/${id.value}`);
-            // Object.assign(categoryForm, response.data);
-            const category = mockCategories.find(c => c.id === parseInt(id.value));
-            if (category) {
-                Object.assign(categoryForm, category);
-            } else {
-                ElMessage.error('分类未找到！');
-                router.push('/categories');
-            }
+            const data = await categoryService.getCategory(parseInt(id.value)); // 调用实际的 API 服务
+            Object.assign(categoryForm, data);
         } catch (error) {
             console.error("Failed to fetch category detail:", error);
             ElMessage.error('获取分类详情失败。');
+            router.push('/categories'); // 获取失败则返回列表页
         }
     }
 };
@@ -106,22 +93,10 @@ const availableParentCategories = computed(() => {
 const submitForm = async () => {
     try {
         if (id.value) {
-            // In a real app: await apiClient.put(`/categories/${id.value}`, categoryForm);
-            const index = mockCategories.findIndex(c => c.id === parseInt(id.value));
-            if (index !== -1) {
-                Object.assign(mockCategories[index], categoryForm);
-                mockCategories[index].updated_at = new Date().toISOString();
-            }
+            await categoryService.updateCategory(parseInt(id.value), categoryForm); // 调用实际的 API 服务
             ElMessage.success('分类更新成功！');
         } else {
-            // In a real app: await apiClient.post('/categories/', categoryForm);
-            const newCategory = {
-                id: mockCategories.length ? Math.max(...mockCategories.map(c => c.id)) + 1 : 1,
-                ...categoryForm,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            mockCategories.push(newCategory);
+            await categoryService.createCategory(categoryForm); // 调用实际的 API 服务
             ElMessage.success('分类创建成功！');
         }
         router.push('/categories');

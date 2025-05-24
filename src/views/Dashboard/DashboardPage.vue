@@ -21,28 +21,35 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-// In a real application, you would import your API services here
-// import { getNewsCount } from '../../services/news';
-// import { getUserCount } from '../../services/users';
-// import { getCommentCount } from '../../services/comments';
+import { newsService } from '../../services/news';
+import { userService } from '../../services/users';
+import { commentService } from '../../services/comments';
 
-// Mock data for demonstration
-const newsCount = ref(150);
-const userCount = ref(500);
-const commentCount = ref(320);
+const newsCount = ref(0);
+const userCount = ref(0);
+const commentCount = ref(0);
 
 onMounted(async () => {
-    // In a real application, fetch actual counts from your backend
-    // try {
-    //     const newsRes = await getNewsCount();
-    //     newsCount.value = newsRes.data.count;
-    //     const userRes = await getUserCount();
-    //     userCount.value = userRes.data.count;
-    //     const commentRes = await getCommentCount();
-    //     commentCount.value = commentRes.data.count;
-    // } catch (error) {
-    //     console.error("Failed to fetch dashboard data:", error);
-    // }
+    try {
+        // 尝试获取新闻总数 (通过获取列表并取长度，如果后端没有专门的 /counts 接口)
+        const newsList = await newsService.getNews({ limit: 1 }); // 只需要一条数据来获取总数，或者后端有 total_count 字段
+        newsCount.value = newsList.total_count !== undefined ? newsList.total_count : newsList.length;
+
+        // 尝试获取用户总数
+        const userList = await userService.getUsers({ limit: 1 });
+        userCount.value = userList.total_count !== undefined ? userList.total_count : userList.length;
+
+        // 尝试获取评论总数
+        const commentList = await commentService.getComments({ limit: 1 });
+        commentCount.value = commentList.total_count !== undefined ? commentList.total_count : commentList.length;
+
+    } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        // 如果获取失败，可以保留为0或者显示一个错误提示
+        newsCount.value = 'N/A';
+        userCount.value = 'N/A';
+        commentCount.value = 'N/A';
+    }
 });
 </script>
 
