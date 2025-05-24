@@ -38,7 +38,9 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import apiClient from '../../services/api'; // For actual API calls
+// import apiClient from '../../services/api'; // 不再直接使用 apiClient，而是通过 service 封装
+import { newsService } from '../../services/news'; // 导入新闻服务
+import { categoryService } from '../../services/categories'; // 导入分类服务
 
 const route = useRoute();
 const router = useRouter();
@@ -54,43 +56,29 @@ const newsForm = reactive({
 });
 const categories = ref([]);
 
-// Mock news data (should be managed by a store or fetched from API)
-const mockNews = [
-    { id: 1, title: '新闻标题1', slug: 'news-title-1', summary: '这是新闻1的摘要', content: '新闻1的详细内容...', author_id: 1, category_id: 1, status: 'published', published_at: '2023-03-01T10:00:00Z', view_count: 120, created_at: '2023-03-01T09:00:00Z', updated_at: '2023-03-01T10:00:00Z', author: { id: 1, username: 'admin' }, category: { id: 1, name: '分类A' }, tags: [{ id: 1, name: '科技' }] },
-    { id: 2, title: '新闻标题2', slug: 'news-title-2', summary: '这是新闻2的摘要', content: '新闻2的详细内容...', author_id: 2, category_id: 2, status: 'draft', published_at: null, view_count: 50, created_at: '2023-03-05T11:00:00Z', updated_at: '2023-03-05T11:00:00Z', author: { id: 2, username: 'user1' }, category: { id: 2, name: '体育' }, tags: [{ id: 2, name: '足球' }] },
-];
-
-// Mock categories data
-const mockCategories = [
-    { id: 1, name: '分类A', slug: 'category-a', description: '描述A', parent_id: null, created_at: '2023-01-01T00:00:00Z', updated_at: '2023-01-01T00:00:00Z' },
-    { id: 2, name: '分类B', slug: 'category-b', description: '描述B', parent_id: null, created_at: '2023-01-02T00:00:00Z', updated_at: '2023-01-02T00:00:00Z' },
-];
+// 移除 mockNews 和 mockCategories，因为我们将从后端获取数据
+// const mockNews = [...];
+// const mockCategories = [...];
 
 const fetchCategories = async () => {
     try {
-        // In a real app: const response = await apiClient.get('/categories');
-        // categories.value = response.data;
-        categories.value = mockCategories; // Using mock data
+        const data = await categoryService.getCategories(); // 调用实际的 API 服务获取分类
+        categories.value = data;
     } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error("Failed to fetch categories for news form:", error);
+        ElMessage.error('获取分类数据失败。');
     }
 };
 
 const fetchNewsDetail = async () => {
     if (id.value) {
         try {
-            // In a real app: const response = await apiClient.get(`/news/${id.value}`);
-            // Object.assign(newsForm, response.data);
-            const newsItem = mockNews.find(n => n.id === parseInt(id.value));
-            if (newsItem) {
-                Object.assign(newsForm, newsItem);
-            } else {
-                ElMessage.error('新闻未找到！');
-                router.push('/news');
-            }
+            const data = await newsService.getNewsDetail(id.value); // 调用实际的 API 服务获取新闻详情
+            Object.assign(newsForm, data);
         } catch (error) {
             console.error("Failed to fetch news detail:", error);
             ElMessage.error('获取新闻详情失败。');
+            router.push('/news');
         }
     }
 };
@@ -98,24 +86,10 @@ const fetchNewsDetail = async () => {
 const submitForm = async () => {
     try {
         if (id.value) {
-            // In a real app: await apiClient.put(`/news/${id.value}`, newsForm);
-            const index = mockNews.findIndex(n => n.id === parseInt(id.value));
-            if (index !== -1) {
-                Object.assign(mockNews[index], newsForm);
-                mockNews[index].updated_at = new Date().toISOString();
-            }
+            await newsService.updateNews(id.value, newsForm); // 调用实际的 API 服务更新新闻
             ElMessage.success('新闻更新成功！');
         } else {
-            // In a real app: await apiClient.post('/news/', newsForm);
-            const newNewsItem = {
-                id: mockNews.length ? Math.max(...mockNews.map(n => n.id)) + 1 : 1,
-                ...newsForm,
-                author_id: 1, // Mock author ID
-                view_count: 0,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            mockNews.push(newNewsItem);
+            await newsService.createNews(newsForm); // 调用实际的 API 服务创建新闻
             ElMessage.success('新闻发布成功！');
         }
         router.push('/news');
@@ -126,8 +100,8 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-    fetchCategories();
-    fetchNewsDetail();
+    fetchCategories(); // 确保在组件挂载时获取分类
+    fetchNewsDetail(); // 确保在组件挂载时获取新闻详情 (如果是编辑模式)
 });
 </script>
 
