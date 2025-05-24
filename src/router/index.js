@@ -137,7 +137,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
     
-    // 1. 直接从 localStorage 获取最新数据
+    // 直接从 localStorage 获取 token 和 user_info，以确保获取到最新状态，避免时序问题
     const tokenInLocalStorage = localStorage.getItem('jwt_token');
     const userInLocalStorageRaw = localStorage.getItem('user_info');
     let userInLocalStorage = null;
@@ -157,23 +157,13 @@ router.beforeEach((to, from, next) => {
         return next('/login');
     }
 
-    // 2. 强制 Pinia Store 的状态与 localStorage 同步
-    // 只有当 Pinia Store 的 token 与 localStorage 不一致时才更新
-    if (authStore.token !== tokenInLocalStorage) {
-        authStore.setToken(tokenInLocalStorage);
-    }
-    // 只有当 Pinia Store 的 user 与 localStorage 不一致时才更新
-    // 并且确保 userInLocalStorage 是一个有效对象，避免 JSON.stringify(null) != JSON.stringify(undefined) 的问题
-    if (tokenInLocalStorage && userInLocalStorage && JSON.stringify(authStore.user) !== JSON.stringify(userInLocalStorage)) {
-        authStore.setUser(userInLocalStorage);
-    } else if (!tokenInLocalStorage && authStore.user) { // 如果 token 不存在但 store 中有 user，则清除 user
-        authStore.setUser(null);
-    }
+    // 确保 Pinia Store 的状态与 localStorage 同步
+    // 这需要在每次路由守卫执行时进行，以确保 Pinia getter 的准确性
+    authStore.token = tokenInLocalStorage;
+    authStore.user = userInLocalStorage; // 直接赋值，Pinia 会处理响应式更新
 
-
-    // 3. 现在，依赖 authStore 的 getter 来判断认证状态，它们现在保证是同步的
-    const isAuthenticated = authStore.isAuthenticated; // 这个 getter 会使用更新后的 'token' 和 'user'
-    const isAdmin = authStore.isAdmin; // isAdmin 也依赖 authStore 中同步的 user
+    const isAuthenticated = !!authStore.token && !!authStore.user;
+    const isAdmin = authStore.user && authStore.user.is_superuser;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         // 如果路由需要认证但用户未认证，则重定向到登录页

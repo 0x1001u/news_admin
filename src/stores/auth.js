@@ -29,10 +29,11 @@ export const useAuthStore = defineStore('auth', {
                 localStorage.removeItem('user_info');
             }
         },
+        // login action 负责更新状态和存储，不负责显示消息
         login(token, user) {
             this.setToken(token);
             this.setUser(user);
-            ElMessage.success('登录成功！');
+            // ElMessage.success('登录成功！'); // 移除此行，由 LoginPage.vue 处理
         },
         logout() {
             this.token = null;
