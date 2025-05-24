@@ -23,27 +23,36 @@
 import { reactive, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
-// ElMessage 不再在此处直接调用 success 消息
+import { ElMessage } from 'element-plus';
 import { authService } from '../../services/auth';
+import { userService } from '../../services/users'; // 导入 userService 来获取用户详情
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const form = reactive({
-    username: '', // 假设后端登录使用邮箱或用户名
-    password: ''
+    username: 'admin@example.com', // 假设后端登录使用邮箱或用户名
+    password: 'adminpass'
 });
 
 const handleLogin = async () => {
     try {
-        const response = await authService.login(form.username, form.password);
-        // 假设后端返回的数据结构包含 access_token 和 user 字段
-        authStore.login(response.access_token, response.user);
-        
-        // 移除此处重复的 ElMessage.success('登录成功！'); 调用，因为它已在 authStore.login 中处理。
+        // 1. 调用后端登录接口获取 token
+        // 假设后端登录接口返回的数据结构是 { access_token: "...", token_type: "bearer" }
+        const loginResponse = await authService.login(form.username, form.password);
+        const accessToken = loginResponse.access_token;
 
-        // 使用 nextTick 确保 Pinia 状态更新和 localStorage 写入完成后，
-        // 再触发路由跳转，给 navigation guard 足够的时间来读取最新的状态。
+        // 2. 将 token 临时保存到 localStorage，以便后续的 getMe 请求能带上认证信息
+        // 注意：authStore.setToken 也会更新 Pinia 状态和 localStorage
+        authStore.setToken(accessToken);
+
+        // 3. 使用获取到的 token 调用 /users/me 接口获取完整的用户详情
+        const userDetails = await userService.getMe();
+
+        // 4. 将 token 和完整的用户详情保存到 Pinia Store
+        authStore.login(accessToken, userDetails); // authStore.login 内部会处理 ElMessage.success
+
+        // 确保 Pinia 状态更新和 localStorage 写入完成后，再触发路由跳转
         await nextTick(); 
         router.push('/dashboard');
 

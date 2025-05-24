@@ -22,6 +22,15 @@ export const userService = {
     },
 
     /**
+     * 获取当前用户信息（/users/me）。
+     * @returns {Promise<object>} - 当前用户的详细信息。
+     */
+    async getMe() {
+        const response = await apiClient.get('/users/me');
+        return response.data;
+    },
+
+    /**
      * 创建新用户。
      * @param {object} userData - 用户数据。
      * @returns {Promise<object>} - 创建成功的用户数据。
