@@ -18,7 +18,7 @@
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
-import { useRoute, useRouter } => 'vue-router';
+import { useRoute, useRouter } from 'vue-router'; // 修正了这里的语法错误
 import { ElMessage } from 'element-plus';
 import { tagService } from '../../services/tags'; // 导入实际的标签服务
 
