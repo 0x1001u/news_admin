@@ -38,7 +38,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
+import apiClient from '../../services/api'; // For actual API calls
 
 const route = useRoute();
 const router = useRouter();
@@ -101,7 +101,8 @@ onMounted(() => {
     fetchNewsDetail(); // 确保在组件挂载时获取新闻详情 (如果是编辑模式)
 });
 
-return { newsForm, categories, submitForm, router, newsId };
+// 移除这里的 return 语句，因为在 <script setup> 中不需要显式返回
+// return { newsForm, categories, submitForm, router, newsId };
 </script>
 
 <style scoped>
