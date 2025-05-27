@@ -1,64 +1,22 @@
 <template>
-  <div class="min-h-screen bg-zinc-900 flex items-center justify-center px-4">
-    <div class="max-w-md w-full bg-zinc-800 rounded-lg shadow-xl p-8 space-y-6">
-      <!-- Logo / Title -->
-      <div class="text-center">
-        <h2 class="text-3xl font-bold text-white">管理后台登录</h2>
-        <p class="mt-2 text-gray-400">请输入您的账号信息以继续</p>
-      </div>
-
-      <!-- Form -->
-      <form @submit.prevent="handleLogin" class="space-y-5">
-        <!-- Email -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-300 mb-1">邮箱地址</label>
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            required
-            placeholder="admin@example.com"
-            class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-        </div>
-
-        <!-- Password -->
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-300 mb-1">密码</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            required
-            placeholder="••••••••"
-            class="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-        </div>
-
-        <!-- Remember me & Forgot password -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center text-sm text-gray-400">
-            <input type="checkbox" class="mr-2 bg-zinc-700 border-zinc-600 rounded text-red-500" />
-            记住我
-          </label>
-          <a href="#" class="text-sm text-red-400 hover:text-red-300">忘记密码？</a>
-        </div>
-
-        <!-- Submit Button -->
-        <button
-          type="submit"
-          class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          登录
-        </button>
-      </form>
-
-      <!-- Footer -->
-      <div class="text-center text-sm text-gray-500">
-        © {{ new Date().getFullYear() }} 管理后台. All rights reserved.
-      </div>
+    <div class="min-h-screen flex items-center justify-center bg-zinc-900 transition-colors duration-300">
+        <el-card class="w-full max-w-md p-8 shadow-xl rounded-lg !bg-zinc-800 !border-zinc-700">
+            <template #header>
+                <div class="text-center text-2xl font-bold text-red-500">管理后台登录</div>
+            </template>
+            <el-form @submit.prevent="handleLogin" label-position="top">
+                <el-form-item label="用户名/邮箱" class="!text-slate-200">
+                    <el-input v-model="form.username" placeholder="请输入用户名或邮箱" class="!bg-zinc-700 !text-slate-200 transition-all duration-200 focus-within:scale-105"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" class="!text-slate-200">
+                    <el-input type="password" v-model="form.password" placeholder="请输入密码" show-password class="!bg-zinc-700 !text-slate-200 transition-all duration-200 focus-within:scale-105"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" native-type="submit" class="w-full font-bold transition-all duration-200 hover:scale-105">登录</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -72,14 +30,14 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const form = reactive({
-    email: '', // 默认值方便测试
+    username: '', // 默认值方便测试
     password: '' // 默认值方便测试
 });
 
 const handleLogin = async () => {
     try {
         const response = await apiClient.post('/auth/login', new URLSearchParams({
-            email: form.email,
+            username: form.username,
             password: form.password
         }), {
             headers: {
