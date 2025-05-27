@@ -3,8 +3,8 @@ import App from './App.vue';
 import router from './router';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css'; // Element Plus 基本样式
-import 'element-plus/dist/index.dark.css'; // Element Plus 暗色模式变量样式 - 修正导入路径
+import 'element-plus/dist/index.css'; // Element Plus 基本样式 - 保留
+// 移除对 'element-plus/dist/index.dark.css' 的导入，Element Plus 内部会处理暗色模式变量切换
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
 // 检查并设置初始的暗色模式 (可以根据用户偏好存储在 localStorage)
