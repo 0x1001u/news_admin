@@ -1,19 +1,28 @@
 <template>
-    <div class="p-6 bg-gray-800 rounded-lg shadow-md border border-gray-700">
-        <h2 class="text-2xl font-bold text-primary-500 mb-4">仪表盘</h2>
-        <p class="text-gray-300 mb-6">欢迎来到新闻资讯平台管理后台！</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            <el-card class="text-center !bg-gray-700 !border-gray-600 !text-gray-50 rounded-lg shadow-md">
-                <div class="text-4xl font-bold text-primary-500">{{ newsCount }}</div>
-                <div class="text-gray-300 mt-2">新闻总数</div>
+    <div class="p-8 bg-gray-900 rounded-xl shadow-lg border border-gray-800">
+        <h1 class="text-3xl font-extrabold text-primary-500 mb-4">仪表盘</h1>
+        <p class="text-gray-400 mb-8">欢迎来到新闻资讯平台管理后台！</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <el-card class="text-center bg-gray-800 border-gray-700 text-gray-100 rounded-xl shadow-lg">
+                <div class="flex items-center justify-center mb-2">
+                    <el-icon class="text-5xl text-primary-500 mr-2"><Document /></el-icon>
+                    <span class="text-4xl font-extrabold text-primary-500">{{ newsCount }}</span>
+                </div>
+                <div class="text-gray-400">新闻总数</div>
             </el-card>
-            <el-card class="text-center !bg-gray-700 !border-gray-600 !text-gray-50 rounded-lg shadow-md">
-                <div class="text-4xl font-bold text-blue-400">{{ userCount }}</div>
-                <div class="text-gray-300 mt-2">注册用户</div>
+            <el-card class="text-center bg-gray-800 border-gray-700 text-gray-100 rounded-xl shadow-lg">
+                <div class="flex items-center justify-center mb-2">
+                    <el-icon class="text-5xl text-blue-400 mr-2"><User /></el-icon>
+                    <span class="text-4xl font-extrabold text-blue-400">{{ userCount }}</span>
+                </div>
+                <div class="text-gray-400">注册用户</div>
             </el-card>
-            <el-card class="text-center !bg-gray-700 !border-gray-600 !text-gray-50 rounded-lg shadow-md">
-                <div class="text-4xl font-bold text-purple-400">{{ commentCount }}</div>
-                <div class="text-gray-300 mt-2">评论总数</div>
+            <el-card class="text-center bg-gray-800 border-gray-700 text-gray-100 rounded-xl shadow-lg">
+                <div class="flex items-center justify-center mb-2">
+                    <el-icon class="text-5xl text-purple-400 mr-2"><ChatDotRound /></el-icon>
+                    <span class="text-4xl font-extrabold text-purple-400">{{ commentCount }}</span>
+                </div>
+                <div class="text-gray-400">评论总数</div>
             </el-card>
         </div>
     </div>
@@ -23,6 +32,7 @@
 import { ref, onMounted } from 'vue';
 import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
 import { ElMessage } from 'element-plus';
+import { Document, User, ChatDotRound } from '@element-plus/icons-vue';
 
 const newsCount = ref(0);
 const userCount = ref(0);
@@ -56,9 +66,13 @@ onMounted(() => {
 <style scoped>
 /* Element Plus 卡片在暗色模式下的样式覆盖 */
 :deep(.el-card) {
-  background-color: #1F2937 !important; /* bg-gray-800 */
-  border-color: #374151 !important; /* border-gray-700 */
-  color: #E5E7EB !important; /* text-gray-50 */
+  background-color: #111827 !important; /* bg-gray-900 */
+  border-color: #2d3748 !important; /* border-gray-800 */
+  color: #f9fafb !important; /* text-gray-100 */
+}
+
+/* 确保卡片内容的样式 */
+:deep(.el-card__body) {
+  padding: 1.5rem; /* p-6 */
 }
 </style>
-
