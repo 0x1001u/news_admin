@@ -1,73 +1,167 @@
 <template>
-    <div class="flex h-screen bg-gray-100">
-        <aside class="w-64 bg-gray-800 text-white flex flex-col">
-            <div class="p-6 text-2xl font-semibold text-teal-400 border-b border-gray-700">管理后台</div>
-            <el-menu
-                default-active="dashboard"
-                class="el-menu-vertical-demo flex-grow"
-                background-color="#1f2937"
-                text-color="#ffffff"
-                active-text-color="#4ade80"
-                :router="true"
-            >
-                <el-menu-item index="/dashboard">
-                    <el-icon><Odometer /></el-icon>
-                    <span>仪表盘</span>
-                </el-menu-item>
-                <el-menu-item index="/users" v-if="authStore.isAdmin">
-                    <el-icon><User /></el-icon>
-                    <span>用户管理</span>
-                </el-menu-item>
-                <el-menu-item index="/news">
-                    <el-icon><Document /></el-icon>
-                    <span>新闻管理</span>
-                </el-menu-item>
-                <el-menu-item index="/categories">
-                    <el-icon><Folder /></el-icon>
-                    <span>分类管理</span>
-                </el-menu-item>
-                <el-menu-item index="/tags">
-                    <el-icon><PriceTag /></el-icon>
-                    <span>标签管理</span>
-                </el-menu-item>
-                <el-menu-item index="/comments">
-                    <el-icon><ChatDotRound /></el-icon>
-                    <span>评论管理</span>
-                </el-menu-item>
-            </el-menu>
-            <div class="p-4 border-t border-gray-700 text-sm text-gray-400">
-                <p>欢迎, {{ authStore.user?.username || '访客' }}</p>
-                <el-button type="danger" size="small" @click="authStore.logout()" class="mt-2 w-full">登出</el-button>
+    <div class="min-h-screen flex flex-col transition-colors duration-300" :class="{ 'dark': isDarkMode }">
+        <header class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 text-gray-50 shadow-md">
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-primary-500">新闻管理后台</h1>
+                <button @click="toggleSidebar" class="ml-4 md:hidden text-gray-400 hover:text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
-        </aside>
+            <div class="flex items-center space-x-4">
+                <el-button @click="toggleDarkMode" :icon="darkModeIcon" circle class="!bg-gray-700 !border-gray-600 !text-gray-300 hover:!bg-gray-600 focus:outline-none">
+                </el-button>
+                <span class="text-gray-300">欢迎, {{ authStore.user?.username || '访客' }}</span>
+                <el-button type="danger" @click="logout">退出</el-button>
+            </div>
+        </header>
 
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white shadow-sm p-4 flex items-center justify-between">
-                <h1 class="text-xl font-semibold text-gray-700">新闻管理后台</h1>
-            </header>
-            <main class="flex-1 overflow-y-auto p-6">
-                <router-view></router-view>
+        <div class="flex flex-1">
+            <aside :class="['w-64', 'bg-gray-900', 'text-gray-200', 'shadow-lg', 'border-r', 'border-gray-700', 'transition-transform', 'duration-300', {'-translate-x-full absolute z-20 md:relative md:translate-x-0': !isSidebarOpen}]"
+                   class="flex-shrink-0 md:flex md:flex-col">
+                <nav class="p-4">
+                    <el-menu
+                        :default-active="$route.path"
+                        class="el-menu-vertical-demo flex-grow !bg-gray-900 !border-r-0"
+                        text-color="#ffffff"
+                        active-text-color="#ffffff"
+                        :router="true"
+                    >
+                        <el-menu-item index="/dashboard" :class="{'!bg-primary-700': $route.path === '/dashboard'}">
+                            <el-icon><Odometer /></el-icon>
+                            <span>仪表盘</span>
+                        </el-menu-item>
+                        <el-menu-item index="/users" v-if="authStore.isAdmin" :class="{'!bg-primary-700': $route.path.startsWith('/users')}">
+                            <el-icon><User /></el-icon>
+                            <span>用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="/news" :class="{'!bg-primary-700': $route.path.startsWith('/news')}">
+                            <el-icon><Document /></el-icon>
+                            <span>新闻管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="/categories" :class="{'!bg-primary-700': $route.path.startsWith('/categories')}">
+                            <el-icon><Folder /></el-icon>
+                            <span>分类管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="/tags" :class="{'!bg-primary-700': $route.path.startsWith('/tags')}">
+                            <el-icon><PriceTag /></el-icon>
+                            <span>标签管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="/comments" :class="{'!bg-primary-700': $route.path.startsWith('/comments')}">
+                            <el-icon><ChatDotRound /></el-icon>
+                            <span>评论管理</span>
+                        </el-menu-item>
+                    </el-menu>
+                </nav>
+                <div class="p-4 border-t border-gray-700 text-sm text-gray-400 mt-auto">
+                    <p>欢迎, {{ authStore.user?.username || '访客' }}</p>
+                    <el-button type="danger" size="small" @click="logout" class="mt-2 w-full">登出</el-button>
+                </div>
+            </aside>
+
+            <main class="flex-1 p-6 bg-gray-900 text-gray-50 overflow-auto">
+                <div class="max-w-7xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
+                    <router-view></router-view>
+                </div>
             </main>
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { Odometer, User, Document, Folder, PriceTag, ChatDotRound } from '@element-plus/icons-vue'; // Import icons
+import { Moon, Sunny, Odometer, User, Document, Folder, PriceTag, ChatDotRound } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
-// Expose icons to the template
-// In Vue 3 setup script, components imported are automatically available in template.
-// No need to explicitly return them if using <script setup>.
+const logout = () => {
+  authStore.logout();
+};
+
+const isSidebarOpen = ref(window.innerWidth >= 768); // 默认在大屏打开侧边栏
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value;
+};
+
+// 暗色模式切换逻辑
+const isDarkMode = ref(document.documentElement.classList.contains('dark'));
+
+const darkModeIcon = computed(() => (isDarkMode.value ? Sunny : Moon));
+
+const toggleDarkMode = () => {
+  if (isDarkMode.value) {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  } else {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }
+  isDarkMode.value = !isDarkMode.value;
+};
+
+// 监听窗口大小变化以调整侧边栏默认状态
+const handleResize = () => {
+  isSidebarOpen.value = window.innerWidth >= 768;
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <style scoped>
-/* Scoped styles for AdminLayout */
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-    width: 200px;
-    min-height: 400px;
+/* Element Plus 菜单项的自定义样式 */
+.el-menu-item {
+    border-radius: 0.375rem; /* rounded-md */
+    margin-bottom: 0.5rem; /* space-y-2 */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.el-menu-item.is-active {
+    background-color: var(--el-menu-active-bg-color, #DC2626) !important; /* 使用 primary-600 */
+    color: #ffffff !important; /* 确保激活状态文本为白色 */
+}
+
+.el-menu-item:hover {
+    background-color: #374151 !important; /* hover:bg-gray-700 */
+    color: #ffffff !important;
+}
+
+/* 覆盖 Element Plus 默认的激活文本颜色，使其在暗色模式下也保持白色 */
+.el-menu-vertical-demo .el-menu-item.is-active span {
+    color: #ffffff !important;
+}
+
+/* 确保 el-button 的 danger 类型在暗色模式下也保持红色 */
+:deep(.el-button--danger) {
+    --el-button-bg-color: #DC2626; /* primary-600 */
+    --el-button-hover-bg-color: #B91C1C; /* primary-700 */
+    --el-button-active-bg-color: #991B1B; /* primary-800 */
+    --el-button-border-color: #DC2626;
+    --el-button-hover-border-color: #B91C1C;
+    --el-button-active-border-color: #991B1B;
+    --el-button-text-color: #ffffff;
+}
+
+/* 确保 el-button 的 primary 类型在暗色模式下也保持红色 */
+:deep(.el-button--primary) {
+    --el-button-bg-color: #DC2626; /* primary-600 */
+    --el-button-hover-bg-color: #B91C1C; /* primary-700 */
+    --el-button-active-bg-color: #991B1B; /* primary-800 */
+    --el-button-border-color: #DC2626;
+    --el-button-hover-border-color: #B91C1C;
+    --el-button-active-border-color: #991B1B;
+    --el-button-text-color: #ffffff;
 }
 </style>
 

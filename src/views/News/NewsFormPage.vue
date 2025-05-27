@@ -1,29 +1,29 @@
 <template>
-    <div class="p-6 bg-white rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ id ? '编辑新闻' : '发布新闻' }}</h2>
-        <el-form :model="newsForm" label-width="80px">
+    <div class="p-6 bg-gray-800 rounded-lg shadow-md border border-gray-700 text-gray-50">
+        <h2 class="text-2xl font-bold text-primary-500 mb-4">{{ newsId ? '编辑新闻' : '发布新闻' }}</h2>
+        <el-form :model="newsForm" label-width="80px" class="text-gray-50">
             <el-form-item label="标题">
-                <el-input v-model="newsForm.title"></el-input>
+                <el-input v-model="newsForm.title" class="!bg-gray-700 !text-gray-50"></el-input>
             </el-form-item>
             <el-form-item label="别名 (Slug)">
-                <el-input v-model="newsForm.slug"></el-input>
+                <el-input v-model="newsForm.slug" class="!bg-gray-700 !text-gray-50"></el-input>
             </el-form-item>
             <el-form-item label="摘要">
-                <el-input type="textarea" v-model="newsForm.summary"></el-input>
+                <el-input type="textarea" v-model="newsForm.summary" rows="3" class="!bg-gray-700 !text-gray-50"></el-input>
             </el-form-item>
             <el-form-item label="内容">
-                <el-input type="textarea" v-model="newsForm.content" rows="10"></el-input>
+                <el-input type="textarea" v-model="newsForm.content" rows="10" class="!bg-gray-700 !text-gray-50"></el-input>
             </el-form-item>
             <el-form-item label="分类">
-                <el-select v-model="newsForm.category_id" placeholder="请选择分类" clearable>
+                <el-select v-model="newsForm.category_id" placeholder="请选择分类" clearable class="!w-full !bg-gray-700 !text-gray-50">
                     <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="状态">
-                <el-radio-group v-model="newsForm.status">
-                    <el-radio label="draft">草稿</el-radio>
-                    <el-radio label="published">已发布</el-radio>
-                    <el-radio label="archived">已归档</el-radio>
+                <el-radio-group v-model="newsForm.status" class="!text-gray-50">
+                    <el-radio label="draft" class="!text-gray-50">草稿</el-radio>
+                    <el-radio label="published" class="!text-gray-50">已发布</el-radio>
+                    <el-radio label="archived" class="!text-gray-50">已归档</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item>
@@ -38,13 +38,11 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-// import apiClient from '../../services/api'; // 不再直接使用 apiClient，而是通过 service 封装
-import { newsService } from '../../services/news'; // 导入新闻服务
-import { categoryService } from '../../services/categories'; // 导入分类服务
+import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
 
 const route = useRoute();
 const router = useRouter();
-const id = ref(route.params.id); // Get ID from route params
+const newsId = ref(route.params.newsId); // Get ID from route params
 
 const newsForm = reactive({
     title: '',
@@ -52,18 +50,15 @@ const newsForm = reactive({
     summary: '',
     content: '',
     category_id: null,
-    status: 'draft'
+    status: 'draft',
+    tag_ids: [] // Ensure tag_ids is initialized
 });
 const categories = ref([]);
 
-// 移除 mockNews 和 mockCategories，因为我们将从后端获取数据
-// const mockNews = [...];
-// const mockCategories = [...];
-
 const fetchCategories = async () => {
     try {
-        const data = await categoryService.getCategories(); // 调用实际的 API 服务获取分类
-        categories.value = data;
+        const response = await apiClient.get('/categories/');
+        categories.value = response.data;
     } catch (error) {
         console.error("Failed to fetch categories for news form:", error);
         ElMessage.error('获取分类数据失败。');
@@ -71,10 +66,12 @@ const fetchCategories = async () => {
 };
 
 const fetchNewsDetail = async () => {
-    if (id.value) {
+    if (newsId.value) {
         try {
-            const data = await newsService.getNewsDetail(id.value); // 调用实际的 API 服务获取新闻详情
-            Object.assign(newsForm, data);
+            const response = await apiClient.get(`/news/${newsId.value}`);
+            Object.assign(newsForm, response.data);
+            // If tags are part of the response and you have a multi-select for tags
+            // newsForm.tag_ids = response.data.tags ? response.data.tags.map(tag => tag.id) : [];
         } catch (error) {
             console.error("Failed to fetch news detail:", error);
             ElMessage.error('获取新闻详情失败。');
@@ -85,11 +82,11 @@ const fetchNewsDetail = async () => {
 
 const submitForm = async () => {
     try {
-        if (id.value) {
-            await newsService.updateNews(id.value, newsForm); // 调用实际的 API 服务更新新闻
+        if (newsId.value) {
+            await apiClient.put(`/news/${newsId.value}`, newsForm);
             ElMessage.success('新闻更新成功！');
         } else {
-            await newsService.createNews(newsForm); // 调用实际的 API 服务创建新闻
+            await apiClient.post('/news/', newsForm);
             ElMessage.success('新闻发布成功！');
         }
         router.push('/news');
@@ -103,9 +100,57 @@ onMounted(() => {
     fetchCategories(); // 确保在组件挂载时获取分类
     fetchNewsDetail(); // 确保在组件挂载时获取新闻详情 (如果是编辑模式)
 });
+
+return { newsForm, categories, submitForm, router, newsId };
 </script>
 
 <style scoped>
 /* Scoped styles for NewsFormPage */
+/* 覆盖 Element Plus 表单组件在暗色模式下的样式 */
+:deep(.el-form-item__label) {
+    color: #E5E7EB !important; /* text-gray-50 */
+}
+
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner),
+:deep(.el-select__wrapper) {
+    background-color: #374151 !important; /* bg-gray-700 */
+    box-shadow: none !important;
+    border: 1px solid #4B5563 !important; /* border-gray-600 */
+}
+
+:deep(.el-input__inner),
+:deep(.el-textarea__inner),
+:deep(.el-select__placeholder),
+:deep(.el-select__suffix) {
+    color: #E5E7EB !important; /* text-gray-50 */
+}
+
+:deep(.el-input__inner::placeholder),
+:deep(.el-textarea__inner::placeholder) {
+    color: #9CA3AF !important; /* text-gray-400 */
+}
+
+:deep(.el-radio) {
+    color: #E5E7EB !important; /* text-gray-50 */
+}
+:deep(.el-radio__input.is-checked + .el-radio__label) {
+    color: #DC2626 !important; /* primary-600 */
+}
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+    background-color: #DC2626 !important;
+    border-color: #DC2626 !important;
+}
+
+/* 确保按钮样式正确 */
+:deep(.el-button--primary) {
+    --el-button-bg-color: #DC2626; /* primary-600 */
+    --el-button-hover-bg-color: #B91C1C; /* primary-700 */
+    --el-button-active-bg-color: #991B1B; /* primary-800 */
+    --el-button-border-color: #DC2626;
+    --el-button-hover-border-color: #B91C1C;
+    --el-button-active-border-color: #991B1B;
+    --el-button-text-color: #ffffff;
+}
 </style>
 
