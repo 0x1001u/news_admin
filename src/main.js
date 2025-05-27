@@ -4,7 +4,7 @@ import router from './router';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css'; // Element Plus 基本样式
-import 'element-plus/theme-chalk/dark/index.css'; // Element Plus 暗色模式变量样式 - 修正导入路径
+import 'element-plus/dist/index.dark.css'; // Element Plus 暗色模式变量样式 - 修正导入路径
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
 // 检查并设置初始的暗色模式 (可以根据用户偏好存储在 localStorage)
