@@ -67,9 +67,7 @@ const handleLogin = async () => {
 
 <style scoped>
 /* Override Element Plus card and form components styles for dark mode */
-:deep(body) {
-    background-color: #080710;
- }
+
 :deep(.el-card) {
   background-color: #1F2937 !important; /* Matches image's card background (dark gray) */
   border-color: #374151 !important; /* Slightly lighter border for contrast */
