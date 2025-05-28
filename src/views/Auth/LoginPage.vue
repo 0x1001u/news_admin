@@ -45,6 +45,10 @@ const handleLogin = async () => {
             }
         });
 
+        // Debug: Log login response headers
+        console.log('Login response headers:', response.headers);
+        console.log('Set-Cookie from login:', response.headers['set-cookie']);
+
         // Get user info
         const userResponse = await apiClient.get('/auth/me');
         const user = userResponse.data;
