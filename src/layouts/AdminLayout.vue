@@ -3,7 +3,7 @@
         <header class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 text-gray-50 shadow-md">
             <div class="flex items-center">
                 <h1 class="text-xl font-bold text-primary-500">新闻管理后台</h1>
-                <button @click="toggleSidebar" class="ml-4 md:hidden text-gray-400 hover:text-white focus:outline-none">
+                <button @click="toggleSidebar" class="ml-4 text-gray-400 hover:text-white focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -102,7 +102,7 @@ const logout = () => {
 };
 
 const isSidebarOpen = ref(false); // Default to closed on mobile
-const isLargeScreen = ref(window.innerWidth >= 768); // Track if screen is large enough to always show sidebar
+const isLargeScreen = ref(window.innerWidth >= 768); // Track if screen is large enough to show sidebar by default
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -127,7 +127,7 @@ const toggleDarkMode = () => {
 // Handle window resize
 const handleResize = () => {
   isLargeScreen.value = window.innerWidth >= 768;
-  // On larger screens, always keep sidebar open
+  // On larger screens, open sidebar by default
   if (isLargeScreen.value) {
     isSidebarOpen.value = true;
   }
