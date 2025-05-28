@@ -28,6 +28,13 @@ apiClient.interceptors.response.use(
         } else {
             ElMessage.error('请求失败，请稍后再试。');
         }
+
+        // Debug: Log response headers for cookie issues
+        if (error.response) {
+            console.log('Response headers:', error.response.headers);
+            console.log('Set-Cookie:', error.response.headers['set-cookie']);
+        }
+
         return Promise.reject(error);
     }
 );
