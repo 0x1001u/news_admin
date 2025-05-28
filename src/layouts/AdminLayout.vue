@@ -18,6 +18,9 @@
         </header>
 
         <div class="flex flex-1">
+            <!-- Backdrop for mobile sidebar -->
+            <div v-if="isSidebarOpen && !isLargeScreen" @click="toggleSidebar" class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"></div>
+
             <aside :class="[
                 'w-64',
                 'bg-gray-900',
@@ -28,12 +31,11 @@
                 'transition-transform',
                 'duration-300',
                 'flex-shrink-0',
-                'md:relative', /* On medium screens and up, sidebar is relative to flow */
-                'md:translate-x-0', /* On medium screens and up, sidebar is always visible */
                 {
-                    'absolute inset-y-0 left-0 z-20': !isSidebarOpen, /* Position absolutely when closed on mobile */
-                    '-translate-x-full': !isSidebarOpen, /* Hide off-screen when closed on mobile */
-                    'translate-x-0': isSidebarOpen /* Show on-screen when open on mobile */
+                    'fixed inset-y-0 left-0 z-20': !isLargeScreen, /* Position absolutely when closed on mobile */
+                    'translate-x-0': isSidebarOpen, /* Show on-screen when open */
+                    '-translate-x-full': !isSidebarOpen, /* Hide off-screen when closed */
+                    'relative': isLargeScreen /* On large screens, sidebar is always visible */
                 }
             ]" class="md:flex md:flex-col">
                 <nav class="p-4">
@@ -76,7 +78,7 @@
                 </div>
             </aside>
 
-            <main class="flex-1 p-6 bg-gray-900 text-gray-50 overflow-auto">
+            <main class="flex-1 p-6 bg-gray-900 text-gray-50 overflow-auto" :class="{ 'md:pl-64': true, 'pl-0': !isLargeScreen && isSidebarOpen, 'pl-0 md:pl-64': !isLargeScreen && !isSidebarOpen }">
                 <div class="max-w-7xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
                     <router-view></router-view>
                 </div>
@@ -99,13 +101,14 @@ const logout = () => {
   authStore.logout();
 };
 
-const isSidebarOpen = ref(window.innerWidth >= 768); // 默认在大屏打开侧边栏
+const isSidebarOpen = ref(false); // Default to closed on mobile
+const isLargeScreen = ref(window.innerWidth >= 768); // Track if screen is large enough to always show sidebar
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
-// 暗色模式切换逻辑
+// Dark mode logic
 const isDarkMode = ref(document.documentElement.classList.contains('dark'));
 
 const darkModeIcon = computed(() => (isDarkMode.value ? Sunny : Moon));
@@ -121,13 +124,19 @@ const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
 };
 
-// 监听窗口大小变化以调整侧边栏默认状态
+// Handle window resize
 const handleResize = () => {
-  isSidebarOpen.value = window.innerWidth >= 768;
+  isLargeScreen.value = window.innerWidth >= 768;
+  // On larger screens, always keep sidebar open
+  if (isLargeScreen.value) {
+    isSidebarOpen.value = true;
+  }
 };
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
+  // Set initial state based on screen size
+  isSidebarOpen.value = isLargeScreen.value;
 });
 
 onBeforeUnmount(() => {
@@ -136,7 +145,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* Element Plus 菜单项的自定义样式 */
+/* Element Plus menu item custom styles */
 .el-menu-item {
     border-radius: 0.375rem; /* rounded-md */
     margin-bottom: 0.5rem; /* space-y-2 */
@@ -144,8 +153,8 @@ onBeforeUnmount(() => {
 }
 
 .el-menu-item.is-active {
-    background-color: var(--el-menu-active-bg-color, #DC2626) !important; /* 使用 primary-600 */
-    color: #ffffff !important; /* 确保激活状态文本为白色 */
+    background-color: var(--el-menu-active-bg-color, #DC2626) !important; /* Use primary-600 */
+    color: #ffffff !important; /* Ensure active state text is white */
 }
 
 .el-menu-item:hover {
@@ -153,12 +162,12 @@ onBeforeUnmount(() => {
     color: #ffffff !important;
 }
 
-/* 覆盖 Element Plus 默认的激活文本颜色，使其在暗色模式下也保持白色 */
+/* Override Element Plus default active text color to keep it white in dark mode */
 .el-menu-vertical-demo .el-menu-item.is-active span {
     color: #ffffff !important;
 }
 
-/* 确保 el-button 的 danger 类型在暗色模式下也保持红色 */
+/* Ensure el-button danger type remains red in dark mode */
 :deep(.el-button--danger) {
     --el-button-bg-color: #DC2626; /* primary-600 */
     --el-button-hover-bg-color: #B91C1C; /* primary-700 */
@@ -169,7 +178,7 @@ onBeforeUnmount(() => {
     --el-button-text-color: #ffffff;
 }
 
-/* 确保 el-button 的 primary 类型在暗色模式下也保持红色 */
+/* Ensure el-button primary type remains red in dark mode */
 :deep(.el-button--primary) {
     --el-button-bg-color: #DC2626; /* primary-600 */
     --el-button-hover-bg-color: #B91C1C; /* primary-700 */
