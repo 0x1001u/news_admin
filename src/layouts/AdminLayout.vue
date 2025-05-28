@@ -18,8 +18,24 @@
         </header>
 
         <div class="flex flex-1">
-            <aside :class="['w-64', 'bg-gray-900', 'text-gray-200', 'shadow-lg', 'border-r', 'border-gray-700', 'transition-transform', 'duration-300', {'-translate-x-full absolute z-20 md:relative md:translate-x-0': !isSidebarOpen}]"
-                   class="flex-shrink-0 md:flex md:flex-col">
+            <aside :class="[
+                'w-64',
+                'bg-gray-900',
+                'text-gray-200',
+                'shadow-lg',
+                'border-r',
+                'border-gray-700',
+                'transition-transform',
+                'duration-300',
+                'flex-shrink-0',
+                'md:relative', /* On medium screens and up, sidebar is relative to flow */
+                'md:translate-x-0', /* On medium screens and up, sidebar is always visible */
+                {
+                    'absolute inset-y-0 left-0 z-20': !isSidebarOpen, /* Position absolutely when closed on mobile */
+                    '-translate-x-full': !isSidebarOpen, /* Hide off-screen when closed on mobile */
+                    'translate-x-0': isSidebarOpen /* Show on-screen when open on mobile */
+                }
+            ]" class="md:flex md:flex-col">
                 <nav class="p-4">
                     <el-menu
                         :default-active="$route.path"
@@ -164,4 +180,3 @@ onBeforeUnmount(() => {
     --el-button-text-color: #ffffff;
 }
 </style>
-
