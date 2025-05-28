@@ -1,11 +1,12 @@
 import apiClient from './api';
+import { setCookie, deleteCookie } from '../utils/cookie';
 
 export const authService = {
     /**
      * 用户登录。
      * @param {string} username - 用户名或邮箱。
      * @param {string} password - 密码。
-     * @returns {Promise<object>} - 包含 access_token 和用户信息的响应。
+     * @returns {Promise<object>} - 包含用户信息的响应。
      */
     async login(username, password) {
         // 您的后端登录接口可能需要 form-urlencoded 或 JSON 格式，
@@ -20,6 +21,8 @@ export const authService = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
+
+        // 后端会设置 HttpOnly cookie，我们只需要处理用户信息
         return response.data;
     },
 
@@ -31,6 +34,9 @@ export const authService = {
         // 假设后端有一个登出接口，用于使 JWT 失效（可选，如果后端使用黑名单机制）
         // 如果后端没有显式登出接口，前端清除本地 token 即可
         await apiClient.post('/auth/logout');
+
+        // 清除非 HttpOnly cookies
+        deleteCookie('user_info');
     },
 
     /**
@@ -54,4 +60,3 @@ export const authService = {
 
     // 更多认证相关服务，如请求密码重置、重置密码等
 };
-

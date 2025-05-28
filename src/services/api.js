@@ -7,15 +7,11 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // Include credentials (cookies) in requests
 });
 
-// 请求拦截器：添加 JWT Token
+// 请求拦截器：不再需要手动添加 JWT Token，因为 HttpOnly cookie 会自动包含在请求中
 apiClient.interceptors.request.use(config => {
-    const authStore = useAuthStore();
-    const token = authStore.token;
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
 });
 
@@ -37,4 +33,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-

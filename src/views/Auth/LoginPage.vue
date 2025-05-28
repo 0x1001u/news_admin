@@ -44,18 +44,12 @@ const handleLogin = async () => {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-        
-        const { access_token, token_type } = response.data;
 
         // Get user info
-        const userResponse = await apiClient.get('/auth/me', {
-            headers: {
-                Authorization: `${token_type} ${access_token}`
-            }
-        });
+        const userResponse = await apiClient.get('/auth/me');
         const user = userResponse.data;
 
-        authStore.login(access_token, user);
+        authStore.login(user);
         router.push('/dashboard');
 
     } catch (error) {

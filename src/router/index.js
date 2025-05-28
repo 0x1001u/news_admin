@@ -5,18 +5,18 @@ import { ElMessage } from 'element-plus';
 // Import Layouts
 import AdminLayout from '../layouts/AdminLayout.vue';
 
-// Import Views
-import LoginPage from '../views/Auth/LoginPage.vue';
-import DashboardPage from '../views/Dashboard/DashboardPage.vue';
-import UserListPage from '../views/Users/UserListPage.vue';
-import UserFormPage from '../views/Users/UserFormPage.vue';
-import NewsListPage from '../views/News/NewsListPage.vue';
-import NewsFormPage from '../views/News/NewsFormPage.vue';
-import CategoryListPage from '../views/Categories/CategoryListPage.vue';
-import CategoryFormPage from '../views/Categories/CategoryFormPage.vue';
-import TagListPage from '../views/Tags/TagListPage.vue';
-import TagFormPage from '../views/Tags/TagFormPage.vue';
-import CommentListPage from '../views/Comments/CommentListPage.vue';
+// Lazy load views
+const LoginPage = () => import('../views/Auth/LoginPage.vue');
+const DashboardPage = () => import('../views/Dashboard/DashboardPage.vue');
+const UserListPage = () => import('../views/Users/UserListPage.vue');
+const UserFormPage = () => import('../views/Users/UserFormPage.vue');
+const NewsListPage = () => import('../views/News/NewsListPage.vue');
+const NewsFormPage = () => import('../views/News/NewsFormPage.vue');
+const CategoryListPage = () => import('../views/Categories/CategoryListPage.vue');
+const CategoryFormPage = () => import('../views/Categories/CategoryFormPage.vue');
+const TagListPage = () => import('../views/Tags/TagListPage.vue');
+const TagFormPage = () => import('../views/Tags/TagFormPage.vue');
+const CommentListPage = () => import('../views/Comments/CommentListPage.vue');
 
 const routes = [
     {
@@ -136,33 +136,9 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
-    
-    // 直接从 localStorage 获取 token 和 user_info，以确保获取到最新状态，避免时序问题
-    const tokenInLocalStorage = localStorage.getItem('jwt_token');
-    const userInLocalStorageRaw = localStorage.getItem('user_info');
-    let userInLocalStorage = null;
 
-    try {
-        if (userInLocalStorageRaw && userInLocalStorageRaw !== 'undefined') {
-            userInLocalStorage = JSON.parse(userInLocalStorageRaw);
-        }
-    } catch (e) {
-        console.error("Error parsing user_info from localStorage in router guard:", e);
-        // 如果解析失败，清除本地存储以避免持续错误
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('user_info');
-        // 确保 authStore 状态也同步清除
-        authStore.logout(); // 调用 logout 会触发路由跳转到 /login
-        ElMessage.error('认证信息已损坏，请重新登录。');
-        return next('/login');
-    }
-
-    // 确保 Pinia Store 的状态与 localStorage 同步
-    // 这需要在每次路由守卫执行时进行，以确保 Pinia getter 的准确性
-    authStore.token = tokenInLocalStorage;
-    authStore.user = userInLocalStorage; // 直接赋值，Pinia 会处理响应式更新
-
-    const isAuthenticated = !!authStore.token && !!authStore.user;
+    // Since token is now in HttpOnly cookie, we only need to check user info
+    const isAuthenticated = !!authStore.user;
     const isAdmin = authStore.user && authStore.user.is_superuser;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
@@ -183,4 +159,3 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
-
