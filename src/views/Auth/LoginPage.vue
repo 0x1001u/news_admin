@@ -1,6 +1,6 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-950 transition-colors duration-300" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); border-radius: 10px; border: 2px solid rgba(255,255,255,0.1);">
-        <el-card class="w-full max-w-sm p-8 shadow-2xl rounded-xl !bg-gray-800 !border-gray-700">
+    <div class="min-h-screen flex items-center justify-center bg-gray-950 transition-colors duration-300" >
+        <el-card class="w-full max-w-sm p-8 shadow-2xl rounded-xl !bg-gray-800 !border-gray-700" style="position: absolute; left: 49%; top: 50%; transform: translate(-50%,-50%); border-radius: 10px; border: 2px solid rgba(255,255,255,0.1);">
             <template #header>
                 <div class="text-center text-3xl font-bold text-gray-100 mb-4">Login Here</div>
             </template>
@@ -67,6 +67,9 @@ const handleLogin = async () => {
 
 <style scoped>
 /* Override Element Plus card and form components styles for dark mode */
+ body {
+    background-color: #080710;
+ }
 :deep(.el-card) {
   background-color: #1F2937 !important; /* Matches image's card background (dark gray) */
   border-color: #374151 !important; /* Slightly lighter border for contrast */
