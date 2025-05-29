@@ -31,12 +31,25 @@ export const authService = {
         formData.append('username', username);
         formData.append('password', password);
 
-        const response = await ApiClient.post('/auth/login', formData.toString(), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+        try {
+            const response = await ApiClient.post('/api/v1/auth/login', formData.toString(), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                console.error('API Response Error:', error.response.data);
+                throw new Error(`Login failed: ${error.response.data.message || error.response.statusText}`);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+                throw new Error('No response from server. Please check your network connection.');
+            } else {
+                console.error('Request setup error:', error.message);
+                throw new Error('Failed to send login request. Please try again.');
             }
-        });
-        return response.data;
+        }
     },
 
     /**
@@ -44,11 +57,19 @@ export const authService = {
      * @returns {Promise<void>}
      */
     async logout() {
-        // 使用新的API客户端调用登出接口
-        await ApiClient.post('/auth/logout');
-
-        // 清除非 HttpOnly cookies
-        deleteCookie('user_info');
+        try {
+            await ApiClient.post('/api/v1/auth/logout');
+            deleteCookie('user_info');
+        } catch (error) {
+            if (error.response) {
+                console.error('Logout failed:', error.response.data);
+            } else if (error.request) {
+                console.error('No response during logout:', error.request);
+            } else {
+                console.error('Logout request error:', error.message);
+            }
+            throw error;
+        }
     },
 
     /**

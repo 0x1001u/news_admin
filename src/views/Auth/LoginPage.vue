@@ -38,7 +38,10 @@ const form = reactive({
 
 const handleLogin = async () => {
     try {
-        const response = await apiClient.post('/auth/login', new URLSearchParams({
+        // 添加请求参数日志
+        console.log('[Login] Request payload:', { username: form.username, password: form.password });
+        
+        const response = await apiClient.post('/api/v1/auth/login', new URLSearchParams({
             username: form.username,
             password: form.password
         }), {
@@ -48,7 +51,7 @@ const handleLogin = async () => {
         });
 
         // 获取用户信息
-        const userResponse = await apiClient.get('/auth/me');
+        const userResponse = await apiClient.get('/api/v1/users/me');
         const user = userResponse.data;
 
         // 存储token到cookie
