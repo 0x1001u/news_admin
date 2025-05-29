@@ -1,4 +1,4 @@
-import { getToken } from '../utils/cookie';
+import { getToken } from '../../utils/cookie';
 
 /**
  * 认证拦截器
