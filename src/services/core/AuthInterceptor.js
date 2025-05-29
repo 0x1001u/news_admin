@@ -7,9 +7,12 @@ import { getToken } from '../../utils/cookie';
  */
 export default function authInterceptor(config) {
   const token = getToken();
+  console.log('[AuthInterceptor] Full config:', config);
+  console.log('[AuthInterceptor] Token existence:', !!token);
   
   if (token) {
-    console.log('设置请求头Authorization: Bearer', token); // 调试日志
+    console.log('[AuthInterceptor] Token:', token);
+    console.log('[AuthInterceptor] Request headers:', config.headers);
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -26,5 +26,7 @@ export const deleteCookie = (name) => {
 };
 
 export function getToken(name = 'token') {
-    return getCookie(name);
+    const token = getCookie(name);
+    console.log('[Cookie] getToken result:', token);
+    return token;
 }

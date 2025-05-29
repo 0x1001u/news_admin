@@ -55,6 +55,8 @@ const handleLogin = async () => {
         const token = response.data.access_token; // 假设token在响应中
         setCookie('token', token, 7);
         console.log('登录成功，token:', token); // 调试日志
+        console.log('[Login] Response data:', response.data);
+        console.log('[Login] Set token:', response.data.access_token);
 
         // 使用新的login API
         authStore.login(user, token); // 传递token
@@ -62,6 +64,7 @@ const handleLogin = async () => {
 
     } catch (error) {
         console.error('登录失败:', error);
+        console.error('[Login] Full error details:', error.toJSON());
     }
 };
 </script>
