@@ -9,6 +9,7 @@ export default function authInterceptor(config) {
   const token = getToken();
   
   if (token) {
+    console.log('设置请求头Authorization: Bearer', token); // 调试日志
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }

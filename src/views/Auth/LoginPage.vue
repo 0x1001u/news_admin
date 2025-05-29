@@ -23,8 +23,9 @@
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { useAuthStore } from '../../stores/auth'; // Ensure auth store is imported
-import apiClient from '../../services/api'; // Ensure actual API client is imported
+import { useAuthStore } from '../../stores/auth';
+import apiClient from '../../services/api';
+import { setCookie } from '../../utils/cookie'; // 添加setCookie导入
 
 
 const authStore = useAuthStore();
@@ -50,8 +51,13 @@ const handleLogin = async () => {
         const userResponse = await apiClient.get('/auth/me');
         const user = userResponse.data;
 
+        // 存储token到cookie
+        const token = response.data.access_token; // 假设token在响应中
+        setCookie('token', token, 7);
+        console.log('登录成功，token:', token); // 调试日志
+
         // 使用新的login API
-        authStore.login(user);
+        authStore.login(user, token); // 传递token
         router.push('/dashboard');
 
     } catch (error) {

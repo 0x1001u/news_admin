@@ -19,6 +19,9 @@ export const useAuthStore = defineStore('auth', {
                 if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
                     this.user = JSON.parse(storedUser);
                 }
+                // 调试日志：输出token值
+                const token = getCookie('token');
+                console.log('初始化token:', token);
             } catch (error) {
                 console.error('用户信息解析失败:', error);
                 this.user = null;
@@ -27,10 +30,12 @@ export const useAuthStore = defineStore('auth', {
         },
         
         // 统一登录和用户设置逻辑
-        login(userData) {
+        login(userData, token) {
             try {
                 this.user = userData;
                 setCookie('user_info', JSON.stringify(userData), 7);
+                setCookie('token', token, 7); // 存储token
+                console.log('登录成功，存储的token:', token); // 调试日志
             } catch (error) {
                 console.error('登录状态保存失败:', error);
                 ElMessage.error('登录状态保存失败');
@@ -40,6 +45,7 @@ export const useAuthStore = defineStore('auth', {
         logout() {
             this.user = null;
             deleteCookie('user_info');
+            deleteCookie('token'); // 删除token cookie
             ElMessage.info('您已登出。');
             router.push('/login');
         }
