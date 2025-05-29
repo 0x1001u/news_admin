@@ -8,44 +8,41 @@
         </template>
 
         <div v-loading="loading" element-loading-text="加载中..." class="min-h-64">
-            <el-table :data="users" style="width: 100%" class="!bg-gray-800 !text-gray-50 !border-gray-700 rounded-md"
-                    :header-cell-style="{ background: '#374151', color: '#E5E7EB', borderBottom: '1px solid #4B5563' }"
-                    :row-style="{ background: '#1F2937' }"
-                    :cell-style="{ borderBottom: '1px solid #4B5563' }"
+            <GenericDataTable
+                :columns="columns"
+                :data="users"
+                :loading="loading"
+                :showPagination="false"
             >
-                <el-table-column prop="id" label="ID" width="80"></el-table-column>
-                <el-table-column prop="username" label="用户名"></el-table-column>
-                <el-table-column prop="email" label="邮箱"></el-table-column>
-                <el-table-column label="角色">
-                    <template #default="scope">
-                        <el-tag :type="scope.row.is_superuser ? 'success' : 'info'">
-                            {{ scope.row.is_superuser ? '管理员' : '普通用户' }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column label="状态">
-                    <template #default="scope">
-                        <el-tag :type="scope.row.is_active ? 'success' : 'danger'">
-                            {{ scope.row.is_active ? '活跃' : '禁用' }}
-                        </el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="180">
-                    <template #default="scope">
-                        <el-button size="small" @click="openUserDialog(scope.row)">编辑</el-button>
-                        <el-popconfirm
-                            title="确定要删除此用户吗？"
-                            confirm-button-text="确定"
-                            cancel-button-text="取消"
-                            @confirm="deleteUser(scope.row.id)"
-                        >
-                            <template #reference>
-                                <el-button size="small" type="danger">删除</el-button>
-                            </template>
-                        </el-popconfirm>
-                    </template>
-                </el-table-column>
-            </el-table>
+                <!-- 角色列自定义渲染 -->
+                <template #column-is_superuser="{ row }">
+                    <el-tag :type="row.is_superuser ? 'success' : 'info'">
+                        {{ row.is_superuser ? '管理员' : '普通用户' }}
+                    </el-tag>
+                </template>
+                
+                <!-- 状态列自定义渲染 -->
+                <template #column-is_active="{ row }">
+                    <el-tag :type="row.is_active ? 'success' : 'danger'">
+                        {{ row.is_active ? '活跃' : '禁用' }}
+                    </el-tag>
+                </template>
+                
+                <!-- 操作列 -->
+                <template #default="{ row }">
+                    <el-button size="small" @click="openUserDialog(row)">编辑</el-button>
+                    <el-popconfirm
+                        title="确定要删除此用户吗？"
+                        confirm-button-text="确定"
+                        cancel-button-text="取消"
+                        @confirm="deleteUser(row.id)"
+                    >
+                        <template #reference>
+                            <el-button size="small" type="danger">删除</el-button>
+                        </template>
+                    </el-popconfirm>
+                </template>
+            </GenericDataTable>
 
             <el-empty v-if="!users.length && !loading" description="暂无用户数据" class="text-gray-400" />
         </div>
@@ -90,8 +87,17 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
-import { Close } from '@element-plus/icons-vue'; // 导入关闭图标
+import apiClient from '../../services/api';
+import { Close } from '@element-plus/icons-vue';
+import GenericDataTable from '../../components/GenericDataTable.vue'; // 导入通用表格组件
+
+const columns = [
+  { prop: 'id', label: 'ID', width: '80' },
+  { prop: 'username', label: '用户名' },
+  { prop: 'email', label: '邮箱' },
+  { prop: 'is_superuser', label: '角色' },
+  { prop: 'is_active', label: '状态' }
+];
 
 const users = ref([]);
 const userDialogVisible = ref(false);
@@ -176,91 +182,6 @@ onMounted(fetchUsers);
 </script>
 
 <style scoped>
-/* 覆盖 Element Plus 表单组件在暗色模式下的样式 */
-:deep(.el-form-item__label) {
-    color: #E5E7EB !important; /* text-gray-50 */
-}
-
-:deep(.el-input__wrapper),
-:deep(.el-textarea__inner),
-:deep(.el-select__wrapper) {
-    background-color: #374151 !important; /* bg-gray-700 */
-    box-shadow: none !important;
-    border: 1px solid #4B5563 !important; /* border-gray-600 */
-}
-
-:deep(.el-input__inner),
-:deep(.el-textarea__inner),
-:deep(.el-select__placeholder),
-:deep(.el-select__suffix) {
-    color: #E5E7EB !important; /* text-gray-50 */
-}
-
-:deep(.el-input__inner::placeholder),
-:deep(.el-textarea__inner::placeholder) {
-    color: #9CA3AF !important; /* text-gray-400 */
-}
-
-:deep(.el-switch__core) {
-    background-color: #4B5563 !important; /* bg-gray-600 for off state */
-    border-color: #4B5563 !important;
-}
-:deep(.el-switch.is-checked .el-switch__core) {
-    background-color: #DC2626 !important; /* primary-600 for on state */
-    border-color: #DC2626 !important;
-}
-
-/* 确保按钮样式正确 */
-:deep(.el-button--primary) {
-    --el-button-bg-color: #DC2626; /* primary-600 */
-    --el-button-hover-bg-color: #B91C1C; /* primary-700 */
-    --el-button-active-bg-color: #991B1B; /* primary-800 */
-    --el-button-border-color: #DC2626;
-    --el-button-hover-border-color: #B91C1C;
-    --el-button-active-border-color: #991B1B;
-    --el-button-text-color: #ffffff;
-}
-
-/* 表格样式 */
-:deep(.el-table) {
-  --el-table-bg-color: #1F2937; /* 表格背景 */
-  --el-table-row-hover-bg-color: #374151; /* 行悬停背景 */
-  --el-table-border-color: #4B5563; /* 边框颜色 */
-  --el-table-text-color: #E5E7EB; /* 文本颜色 */
-  --el-table-header-bg-color: #374151; /* 表头背景 */
-  --el-table-header-text-color: #D1D5DB; /* 表头文本 */
-}
-:deep(.el-table th.el-table__cell) {
-  background-color: var(--el-table-header-bg-color) !important;
-  color: var(--el-table-header-text-color) !important;
-  border-bottom: var(--el-table-border-color) !important;
-}
-:deep(.el-table tr) {
-  background-color: var(--el-table-bg-color) !important;
-  color: var(--el-table-text-color) !important;
-}
-:deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid var(--el-table-border-color) !important;
-}
-
-/* 消息框的暗色模式样式 */
-:deep(.el-message-box) {
-  background-color: #1F2937 !important;
-  border-color: #4B5563 !important;
-  color: #E5E7EB !important;
-}
-:deep(.el-message-box__title) {
-  color: #E5E7EB !important;
-}
-:deep(.el-message-box__message p) {
-  color: #D1D5DB !important;
-}
-:deep(.el-message-box__input) {
-  background-color: #374151 !important;
-  border-color: #4B5563 !important;
-}
-:deep(.el-message-box__input .el-input__inner) {
-  color: #E5E7EB !important;
-}
+/* 保留对话框相关样式 */
 </style>
 

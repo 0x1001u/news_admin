@@ -1,4 +1,4 @@
-import apiClient from './api';
+import ApiClient from './core/ApiClient';
 
 export const tagService = {
     /**
@@ -7,7 +7,7 @@ export const tagService = {
      * @returns {Promise<object>} - 包含标签列表的响应。
      */
     async getTags(params = {}) {
-        const response = await apiClient.get('/tags/', { params });
+        const response = await ApiClient.get('/tags/', { params });
         return response.data;
     },
 
@@ -17,7 +17,7 @@ export const tagService = {
      * @returns {Promise<object>} - 单个标签的详细信息。
      */
     async getTag(tagIdOrSlug) {
-        const response = await apiClient.get(`/tags/${tagIdOrSlug}`);
+        const response = await ApiClient.get(`/tags/${tagIdOrSlug}`);
         return response.data;
     },
 
@@ -27,7 +27,7 @@ export const tagService = {
      * @returns {Promise<object>} - 创建成功的标签数据。
      */
     async createTag(tagData) {
-        const response = await apiClient.post('/tags/', tagData);
+        const response = await ApiClient.post('/tags/', tagData);
         return response.data;
     },
 
@@ -38,7 +38,7 @@ export const tagService = {
      * @returns {Promise<object>} - 更新后的标签数据。
      */
     async updateTag(tagIdOrSlug, tagData) {
-        const response = await apiClient.put(`/tags/${tagIdOrSlug}`, tagData);
+        const response = await ApiClient.put(`/tags/${tagIdOrSlug}`, tagData);
         return response.data;
     },
 
@@ -48,7 +48,7 @@ export const tagService = {
      * @returns {Promise<void>}
      */
     async deleteTag(tagIdOrSlug) {
-        await apiClient.delete(`/tags/${tagIdOrSlug}`);
+        await ApiClient.delete(`/tags/${tagIdOrSlug}`);
     },
 
     /**
@@ -58,7 +58,7 @@ export const tagService = {
      * @returns {Promise<object>} - 包含新闻列表的响应。
      */
     async getNewsByTag(tagIdOrSlug, params = {}) {
-        const response = await apiClient.get(`/tags/${tagIdOrSlug}/news`, { params });
+        const response = await ApiClient.get(`/tags/${tagIdOrSlug}/news`, { params });
         return response.data;
     },
 };

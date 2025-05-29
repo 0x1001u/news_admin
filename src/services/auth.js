@@ -1,5 +1,5 @@
-import apiClient from './api';
-import { setCookie, deleteCookie } from '../utils/cookie';
+import ApiClient from './core/ApiClient';
+import { deleteCookie } from '../utils/cookie';
 
 export const authService = {
     /**
@@ -9,20 +9,33 @@ export const authService = {
      * @returns {Promise<object>} - 包含用户信息的响应。
      */
     async login(username, password) {
-        // 您的后端登录接口可能需要 form-urlencoded 或 JSON 格式，
-        // 请根据您的后端实际情况调整。这里假设是 form-urlencoded。
+        // 开发环境使用环境变量验证
+        if (import.meta.env.MODE === 'development') {
+            const envUsername = import.meta.env.VITE_ADMIN_USERNAME;
+            const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+            
+            if (username === envUsername && password === envPassword) {
+                return {
+                    user: {
+                        id: 1,
+                        username: envUsername,
+                        role: 'admin'
+                    }
+                };
+            }
+            throw new Error('Invalid credentials');
+        }
+        
+        // 生产环境使用API
         const formData = new URLSearchParams();
         formData.append('username', username);
         formData.append('password', password);
 
-        // 使用 apiClient 发送 POST 请求到后端登录接口
-        const response = await apiClient.post('/auth/login', formData.toString(), {
+        const response = await ApiClient.post('/auth/login', formData.toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-
-        // 后端会设置 HttpOnly cookie，我们只需要处理用户信息
         return response.data;
     },
 
@@ -31,9 +44,8 @@ export const authService = {
      * @returns {Promise<void>}
      */
     async logout() {
-        // 假设后端有一个登出接口，用于使 JWT 失效（可选，如果后端使用黑名单机制）
-        // 如果后端没有显式登出接口，前端清除本地 token 即可
-        await apiClient.post('/auth/logout');
+        // 使用新的API客户端调用登出接口
+        await ApiClient.post('/auth/logout');
 
         // 清除非 HttpOnly cookies
         deleteCookie('user_info');
@@ -44,7 +56,7 @@ export const authService = {
      * @returns {Promise<object>} - 当前用户的详细信息。
      */
     async getMe() {
-        const response = await apiClient.get('/users/me');
+        const response = await ApiClient.get('/users/me');
         return response.data;
     },
 
@@ -54,7 +66,7 @@ export const authService = {
      * @returns {Promise<object>}
      */
     async register(userData) {
-        const response = await apiClient.post('/auth/register', userData);
+        const response = await ApiClient.post('/auth/register', userData);
         return response.data;
     },
 

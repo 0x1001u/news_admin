@@ -23,48 +23,49 @@
     </template>
 
     <div v-loading="loading" element-loading-text="加载中..." class="min-h-64">
-      <el-table :data="newsList" style="width: 100%" class="!bg-gray-800 !text-gray-50 !border-gray-700 rounded-md"
-                :header-cell-style="{ background: '#374151', color: '#E5E7EB', borderBottom: '1px solid #4B5563' }"
-                :row-style="{ background: '#1F2937' }"
-                :cell-style="{ borderBottom: '1px solid #4B5563' }"
+      <GenericDataTable
+        :columns="columns"
+        :data="newsList"
+        :loading="loading"
+        :showPagination="false"
       >
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
-        <el-table-column prop="title" label="标题"></el-table-column>
-        <el-table-column label="作者">
-            <template #default="scope">{{ scope.row.author ? scope.row.author.username : '未知' }}</template>
-        </el-table-column>
-        <el-table-column label="分类">
-            <template #default="scope">{{ scope.row.category ? scope.row.category.name : '无' }}</template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="getStatusTagType(scope.row.status)">
-              {{ getStatusText(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="view_count" label="浏览" width="80"></el-table-column>
-        <el-table-column prop="published_at" label="发布时间" width="180">
-          <template #default="scope">
-            {{ scope.row.published_at ? formatDate(scope.row.published_at) : '未发布' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row.id)">编辑</el-button>
-            <el-popconfirm
-              title="确定要删除这条新闻吗？"
-              confirm-button-text="确定"
-              cancel-button-text="取消"
-              @confirm="handleDelete(scope.row.id)"
-            >
-              <template #reference>
-                <el-button size="small" type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
+        <!-- 作者列 -->
+        <template #column-author="{ row }">
+          {{ row.author ? row.author.username : '未知' }}
+        </template>
+        
+        <!-- 分类列 -->
+        <template #column-category="{ row }">
+          {{ row.category ? row.category.name : '无' }}
+        </template>
+        
+        <!-- 状态列 -->
+        <template #column-status="{ row }">
+          <el-tag :type="getStatusTagType(row.status)">
+            {{ getStatusText(row.status) }}
+          </el-tag>
+        </template>
+        
+        <!-- 发布时间列 -->
+        <template #column-published_at="{ row }">
+          {{ row.published_at ? formatDate(row.published_at) : '未发布' }}
+        </template>
+        
+        <!-- 操作列 -->
+        <template #default="{ row }">
+          <el-button size="small" @click="handleEdit(row.id)">编辑</el-button>
+          <el-popconfirm
+            title="确定要删除这条新闻吗？"
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            @confirm="handleDelete(row.id)"
+          >
+            <template #reference>
+              <el-button size="small" type="danger">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </GenericDataTable>
 
       <el-empty v-if="!newsList.length && !loading" description="暂无新闻数据" class="text-gray-400" />
     </div>
@@ -87,7 +88,18 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
+import apiClient from '../../services/api';
+import GenericDataTable from '../../components/GenericDataTable.vue'; // 导入通用表格组件
+
+const columns = [
+  { prop: 'id', label: 'ID', width: '80' },
+  { prop: 'title', label: '标题' },
+  { prop: 'author', label: '作者' },
+  { prop: 'category', label: '分类' },
+  { prop: 'status', label: '状态', width: '100' },
+  { prop: 'view_count', label: '浏览', width: '80' },
+  { prop: 'published_at', label: '发布时间', width: '180' }
+];
 
 const router = useRouter();
 const newsList = ref([]);
@@ -224,27 +236,6 @@ onMounted(() => {
   color: #9CA3AF !important; /* text-gray-400 */
 }
 
-/* 表格样式 */
-:deep(.el-table) {
-  --el-table-bg-color: #1F2937; /* 表格背景 */
-  --el-table-row-hover-bg-color: #374151; /* 行悬停背景 */
-  --el-table-border-color: #4B5563; /* 边框颜色 */
-  --el-table-text-color: #E5E7EB; /* 文本颜色 */
-  --el-table-header-bg-color: #374151; /* 表头背景 */
-  --el-table-header-text-color: #D1D5DB; /* 表头文本 */
-}
-:deep(.el-table th.el-table__cell) {
-  background-color: var(--el-table-header-bg-color) !important;
-  color: var(--el-table-header-text-color) !important;
-  border-bottom: var(--el-table-border-color) !important;
-}
-:deep(.el-table tr) {
-  background-color: var(--el-table-bg-color) !important;
-  color: var(--el-table-text-color) !important;
-}
-:deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid var(--el-table-border-color) !important;
-}
 
 /* 确保分页组件在暗色模式下样式正确 */
 :deep(.el-pagination) {

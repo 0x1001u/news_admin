@@ -8,33 +8,32 @@
         </template>
 
         <div v-loading="loading" element-loading-text="加载中..." class="min-h-64">
-            <el-table :data="categories" style="width: 100%" class="!bg-gray-800 !text-gray-50 !border-gray-700 rounded-md"
-                    :header-cell-style="{ background: '#374151', color: '#E5E7EB', borderBottom: '1px solid #4B5563' }"
-                    :row-style="{ background: '#1F2937' }"
-                    :cell-style="{ borderBottom: '1px solid #4B5563' }"
+            <GenericDataTable
+                :columns="columns"
+                :data="categories"
+                :loading="loading"
+                :showPagination="false"
             >
-                <el-table-column prop="id" label="ID" width="80"></el-table-column>
-                <el-table-column prop="name" label="名称"></el-table-column>
-                <el-table-column prop="slug" label="别名"></el-table-column>
-                <el-table-column label="父分类">
-                    <template #default="scope">{{ scope.row.parent_id ? categories.find(c => c.id === scope.row.parent_id)?.name : '无' }}</template>
-                </el-table-column>
-                <el-table-column label="操作" width="180">
-                    <template #default="scope">
-                        <el-button size="small" @click="openCategoryDialog(scope.row)">编辑</el-button>
-                        <el-popconfirm
-                            title="确定要删除此分类吗？"
-                            confirm-button-text="确定"
-                            cancel-button-text="取消"
-                            @confirm="deleteCategory(scope.row.id)"
-                        >
-                            <template #reference>
-                                <el-button size="small" type="danger">删除</el-button>
-                            </template>
-                        </el-popconfirm>
-                    </template>
-                </el-table-column>
-            </el-table>
+                <!-- 父分类列自定义渲染 -->
+                <template #column-parent_id="{ row }">
+                  {{ row.parent_id ? categories.find(c => c.id === row.parent_id)?.name : '无' }}
+                </template>
+                
+                <!-- 操作列 -->
+                <template #default="{ row }">
+                    <el-button size="small" @click="openCategoryDialog(row)">编辑</el-button>
+                    <el-popconfirm
+                        title="确定要删除此分类吗？"
+                        confirm-button-text="确定"
+                        cancel-button-text="取消"
+                        @confirm="deleteCategory(row.id)"
+                    >
+                        <template #reference>
+                            <el-button size="small" type="danger">删除</el-button>
+                        </template>
+                    </el-popconfirm>
+                </template>
+            </GenericDataTable>
 
             <el-empty v-if="!categories.length && !loading" description="暂无分类数据" class="text-gray-400" />
         </div>
@@ -78,8 +77,16 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
-import { Close } from '@element-plus/icons-vue'; // 导入关闭图标
+import apiClient from '../../services/api';
+import { Close } from '@element-plus/icons-vue';
+import GenericDataTable from '../../components/GenericDataTable.vue'; // 导入通用表格组件
+
+const columns = [
+  { prop: 'id', label: 'ID', width: '80' },
+  { prop: 'name', label: '名称' },
+  { prop: 'slug', label: '别名' },
+  { prop: 'parent_id', label: '父分类' }
+];
 
 const categories = ref([]);
 const categoryDialogVisible = ref(false);
@@ -193,27 +200,6 @@ onMounted(fetchCategories);
     --el-button-text-color: #ffffff;
 }
 
-/* 表格样式 */
-:deep(.el-table) {
-  --el-table-bg-color: #1F2937; /* 表格背景 */
-  --el-table-row-hover-bg-color: #374151; /* 行悬停背景 */
-  --el-table-border-color: #4B5563; /* 边框颜色 */
-  --el-table-text-color: #E5E7EB; /* 文本颜色 */
-  --el-table-header-bg-color: #374151; /* 表头背景 */
-  --el-table-header-text-color: #D1D5DB; /* 表头文本 */
-}
-:deep(.el-table th.el-table__cell) {
-  background-color: var(--el-table-header-bg-color) !important;
-  color: var(--el-table-header-text-color) !important;
-  border-bottom: var(--el-table-border-color) !important;
-}
-:deep(.el-table tr) {
-  background-color: var(--el-table-bg-color) !important;
-  color: var(--el-table-text-color) !important;
-}
-:deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid var(--el-table-border-color) !important;
-}
 
 /* 消息框的暗色模式样式 */
 :deep(.el-message-box) {

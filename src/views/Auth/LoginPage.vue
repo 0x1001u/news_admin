@@ -26,12 +26,14 @@ import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth'; // Ensure auth store is imported
 import apiClient from '../../services/api'; // Ensure actual API client is imported
 
+import { useAuthStore } from '@/stores/auth'; // 使用别名简化路径
+
 const authStore = useAuthStore();
 const router = useRouter();
 
 const form = reactive({
-    username: 'admin', // Default value for testing
-    password: 'adminpass' // Default value for testing
+    username: 'admin', // 测试用默认值
+    password: 'adminpass' // 测试用默认值
 });
 
 const handleLogin = async () => {
@@ -45,20 +47,16 @@ const handleLogin = async () => {
             }
         });
 
-        // Debug: Log login response headers
-        console.log('Login response headers:', response.headers);
-        console.log('Set-Cookie from login:', response.headers['set-cookie']);
-
-        // Get user info
+        // 获取用户信息
         const userResponse = await apiClient.get('/auth/me');
         const user = userResponse.data;
 
+        // 使用新的login API
         authStore.login(user);
         router.push('/dashboard');
 
     } catch (error) {
-        // Errors are handled in the apiClient interceptor, no additional handling needed here for now, or just for debugging
-        console.error('Login failed:', error);
+        console.error('登录失败:', error);
     }
 };
 </script>

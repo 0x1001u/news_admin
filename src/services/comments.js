@@ -1,4 +1,4 @@
-import apiClient from './api';
+import ApiClient from './core/ApiClient';
 
 export const commentService = {
     /**
@@ -7,7 +7,7 @@ export const commentService = {
      * @returns {Promise<object>} - 包含评论列表的响应。
      */
     async getComments(params = {}) {
-        const response = await apiClient.get('/comments/', { params });
+        const response = await ApiClient.get('/comments/', { params });
         return response.data;
     },
 
@@ -17,7 +17,7 @@ export const commentService = {
      * @returns {Promise<object>} - 单个评论的详细信息。
      */
     async getComment(commentId) {
-        const response = await apiClient.get(`/comments/${commentId}`);
+        const response = await ApiClient.get(`/comments/${commentId}`);
         return response.data;
     },
 
@@ -28,7 +28,7 @@ export const commentService = {
      * @returns {Promise<object>} - 创建成功的评论数据。
      */
     async createCommentForNews(newsIdOrSlug, commentData) {
-        const response = await apiClient.post(`/news/${newsIdOrSlug}/comments`, commentData);
+        const response = await ApiClient.post(`/news/${newsIdOrSlug}/comments`, commentData);
         return response.data;
     },
 
@@ -39,7 +39,7 @@ export const commentService = {
      * @returns {Promise<object>} - 创建成功的回复评论数据。
      */
     async replyToComment(parentCommentId, replyData) {
-        const response = await apiClient.post(`/comments/${parentCommentId}/reply`, replyData);
+        const response = await ApiClient.post(`/comments/${parentCommentId}/reply`, replyData);
         return response.data;
     },
 
@@ -50,7 +50,7 @@ export const commentService = {
      * @returns {Promise<object>} - 更新后的评论数据。
      */
     async updateComment(commentId, commentData) {
-        const response = await apiClient.put(`/comments/${commentId}`, commentData);
+        const response = await ApiClient.put(`/comments/${commentId}`, commentData);
         return response.data;
     },
 
@@ -60,7 +60,7 @@ export const commentService = {
      * @returns {Promise<void>}
      */
     async deleteComment(commentId) {
-        await apiClient.delete(`/comments/${commentId}`);
+        await ApiClient.delete(`/comments/${commentId}`);
     },
 };
 

@@ -1,4 +1,4 @@
-import apiClient from './api';
+import ApiClient from './core/ApiClient';
 
 export const userService = {
     /**
@@ -7,7 +7,7 @@ export const userService = {
      * @returns {Promise<object>} - 包含用户列表的响应。
      */
     async getUsers(params = {}) {
-        const response = await apiClient.get('/users/', { params });
+        const response = await ApiClient.get('/users/', { params });
         return response.data;
     },
 
@@ -17,7 +17,7 @@ export const userService = {
      * @returns {Promise<object>} - 单个用户的详细信息。
      */
     async getUser(userId) {
-        const response = await apiClient.get(`/users/${userId}`);
+        const response = await ApiClient.get(`/users/${userId}`);
         return response.data;
     },
 
@@ -26,7 +26,7 @@ export const userService = {
      * @returns {Promise<object>} - 当前用户的详细信息。
      */
     async getMe() {
-        const response = await apiClient.get('/users/me');
+        const response = await ApiClient.get('/users/me');
         return response.data;
     },
 
@@ -36,7 +36,7 @@ export const userService = {
      * @returns {Promise<object>} - 创建成功的用户数据。
      */
     async createUser(userData) {
-        const response = await apiClient.post('/users/', userData);
+        const response = await ApiClient.post('/users/', userData);
         return response.data;
     },
 
@@ -47,7 +47,7 @@ export const userService = {
      * @returns {Promise<object>} - 更新后的用户数据。
      */
     async updateUser(userId, userData) {
-        const response = await apiClient.put(`/users/${userId}`, userData);
+        const response = await ApiClient.put(`/users/${userId}`, userData);
         return response.data;
     },
 
@@ -57,7 +57,7 @@ export const userService = {
      * @returns {Promise<void>}
      */
     async deleteUser(userId) {
-        await apiClient.delete(`/users/${userId}`);
+        await ApiClient.delete(`/users/${userId}`);
     },
 
     // 更多用户相关服务，如修改密码、禁用/启用用户等

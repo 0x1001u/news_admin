@@ -1,4 +1,4 @@
-import apiClient from './api';
+import ApiClient from './core/ApiClient';
 
 export const newsService = {
     /**
@@ -7,7 +7,7 @@ export const newsService = {
      * @returns {Promise<object>} - 包含新闻列表的响应。
      */
     async getNews(params = {}) {
-        const response = await apiClient.get('/news/', { params });
+        const response = await ApiClient.get('/news/', { params });
         return response.data;
     },
 
@@ -17,7 +17,7 @@ export const newsService = {
      * @returns {Promise<object>} - 单条新闻的详细信息。
      */
     async getNewsDetail(newsIdOrSlug) {
-        const response = await apiClient.get(`/news/${newsIdOrSlug}`);
+        const response = await ApiClient.get(`/news/${newsIdOrSlug}`);
         return response.data;
     },
 
@@ -27,7 +27,7 @@ export const newsService = {
      * @returns {Promise<object>} - 创建成功的新闻数据。
      */
     async createNews(newsData) {
-        const response = await apiClient.post('/news/', newsData);
+        const response = await ApiClient.post('/news/', newsData);
         return response.data;
     },
 
@@ -38,7 +38,7 @@ export const newsService = {
      * @returns {Promise<object>} - 更新后的新闻数据。
      */
     async updateNews(newsIdOrSlug, newsData) {
-        const response = await apiClient.put(`/news/${newsIdOrSlug}`, newsData);
+        const response = await ApiClient.put(`/news/${newsIdOrSlug}`, newsData);
         return response.data;
     },
 
@@ -48,7 +48,7 @@ export const newsService = {
      * @returns {Promise<void>}
      */
     async deleteNews(newsIdOrSlug) {
-        await apiClient.delete(`/news/${newsIdOrSlug}`);
+        await ApiClient.delete(`/news/${newsIdOrSlug}`);
     },
 
     // 更多新闻相关服务，如上传图片等

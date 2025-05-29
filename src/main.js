@@ -4,6 +4,7 @@ import router from './router';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css'; // Element Plus 基本样式 - 保留
+import './styles/tokens.css'; // 导入自定义样式token
 // 移除对 'element-plus/dist/index.dark.css' 的导入，Element Plus 内部会处理暗色模式变量切换
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
@@ -20,6 +21,11 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
+
+// 初始化auth store
+const authStore = useAuthStore();
+authStore.initialize();
+
 app.use(router);
 app.use(ElementPlus);
 

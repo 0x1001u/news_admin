@@ -1,42 +1,47 @@
 import { defineStore } from 'pinia';
 import { ElMessage } from 'element-plus';
-import router from '../router'; // Import router for redirection
+import router from '../router';
 import { getCookie, setCookie, deleteCookie } from '../utils/cookie';
 
 export const useAuthStore = defineStore('auth', {
-    state: () => {
-        const storedUser = getCookie('user_info');
-        return {
-            // Token now stored in HttpOnly cookie, not accessible via JS
-            token: null, // This will be null as HttpOnly cookies can't be accessed
-            // 只有当 storedUser 是一个非空字符串时才尝试解析 JSON
-            user: storedUser && storedUser !== 'undefined' ? JSON.parse(storedUser) : null,
-        };
-    },
+    state: () => ({
+        user: null, // 统一使用user状态管理
+    }),
     getters: {
-        isAuthenticated: (state) => !!state.user, // Only check user since token is in HttpOnly cookie
-        isAdmin: (state) => state.user && state.user.is_superuser,
+        isAuthenticated: (state) => !!state.user,
+        isAdmin: (state) => state.user?.is_superuser || false,
     },
     actions: {
-        setUser(user) {
-            this.user = user;
-            // 确保只存储有效的用户对象，如果 user 为 null，则移除 'user_info'
-            if (user) {
-                setCookie('user_info', JSON.stringify(user), 7); // Store for 7 days
-            } else {
+        // 初始化时从cookie加载用户状态
+        initialize() {
+            try {
+                const storedUser = getCookie('user_info');
+                if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
+                    this.user = JSON.parse(storedUser);
+                }
+            } catch (error) {
+                console.error('用户信息解析失败:', error);
+                this.user = null;
                 deleteCookie('user_info');
             }
         },
-        // login action 负责更新状态和存储，不负责显示消息
-        login(user) {
-            this.setUser(user);
-            // ElMessage.success('登录成功！'); // 移除此行，由 LoginPage.vue 处理
+        
+        // 统一登录和用户设置逻辑
+        login(userData) {
+            try {
+                this.user = userData;
+                setCookie('user_info', JSON.stringify(userData), 7);
+            } catch (error) {
+                console.error('登录状态保存失败:', error);
+                ElMessage.error('登录状态保存失败');
+            }
         },
+        
         logout() {
             this.user = null;
-            deleteCookie('user_info'); // 确保移除 user_info
+            deleteCookie('user_info');
             ElMessage.info('您已登出。');
-            router.push('/login'); // Redirect to login page on logout
-        },
+            router.push('/login');
+        }
     },
 });

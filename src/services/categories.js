@@ -1,4 +1,4 @@
-import apiClient from './api';
+import ApiClient from './core/ApiClient';
 
 export const categoryService = {
     /**
@@ -7,7 +7,7 @@ export const categoryService = {
      * @returns {Promise<object>} - 包含分类列表的响应。
      */
     async getCategories(params = {}) {
-        const response = await apiClient.get('/categories/', { params });
+        const response = await ApiClient.get('/categories/', { params });
         return response.data;
     },
 
@@ -17,7 +17,7 @@ export const categoryService = {
      * @returns {Promise<object>} - 单个分类的详细信息。
      */
     async getCategory(categoryIdOrSlug) {
-        const response = await apiClient.get(`/categories/${categoryIdOrSlug}`);
+        const response = await ApiClient.get(`/categories/${categoryIdOrSlug}`);
         return response.data;
     },
 
@@ -27,7 +27,7 @@ export const categoryService = {
      * @returns {Promise<object>} - 创建成功的分类数据。
      */
     async createCategory(categoryData) {
-        const response = await apiClient.post('/categories/', categoryData);
+        const response = await ApiClient.post('/categories/', categoryData);
         return response.data;
     },
 
@@ -38,7 +38,7 @@ export const categoryService = {
      * @returns {Promise<object>} - 更新后的分类数据。
      */
     async updateCategory(categoryIdOrSlug, categoryData) {
-        const response = await apiClient.put(`/categories/${categoryIdOrSlug}`, categoryData);
+        const response = await ApiClient.put(`/categories/${categoryIdOrSlug}`, categoryData);
         return response.data;
     },
 
@@ -48,7 +48,7 @@ export const categoryService = {
      * @returns {Promise<void>}
      */
     async deleteCategory(categoryIdOrSlug) {
-        await apiClient.delete(`/categories/${categoryIdOrSlug}`);
+        await ApiClient.delete(`/categories/${categoryIdOrSlug}`);
     },
 
     /**
@@ -58,7 +58,7 @@ export const categoryService = {
      * @returns {Promise<object>} - 包含新闻列表的响应。
      */
     async getNewsByCategory(categoryIdOrSlug, params = {}) {
-        const response = await apiClient.get(`/categories/${categoryIdOrSlug}/news`, { params });
+        const response = await ApiClient.get(`/categories/${categoryIdOrSlug}/news`, { params });
         return response.data;
     },
 };
