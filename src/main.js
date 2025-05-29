@@ -21,11 +21,6 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-
-// 初始化auth store
-const authStore = useAuthStore();
-authStore.initialize();
-
 app.use(router);
 app.use(ElementPlus);
 
@@ -35,4 +30,5 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app.mount('#app');
+
 
