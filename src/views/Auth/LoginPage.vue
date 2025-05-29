@@ -26,7 +26,6 @@ import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth'; // Ensure auth store is imported
 import apiClient from '../../services/api'; // Ensure actual API client is imported
 
-import { useAuthStore } from '@/stores/auth'; // 使用别名简化路径
 
 const authStore = useAuthStore();
 const router = useRouter();
