@@ -12,7 +12,13 @@
                     <el-input type="password" v-model="form.password" placeholder="Password" show-password class="!bg-gray-700 !text-gray-50 rounded-md"></el-input>
                 </el-form-item>
                 <el-form-item class="mt-8">
-                    <el-button type="default" native-type="submit" class="w-full !bg-white !text-gray-900 !border-white hover:!bg-gray-100 hover:!text-gray-800 focus:!outline-none focus:!ring-2 focus:!ring-white focus:!ring-offset-2 focus:!ring-offset-gray-900 !font-semibold !py-3 !rounded-md">Log In</el-button>
+                    <el-button
+                      type="default"
+                      native-type="submit"
+                      :loading="isLoading"
+                      class="w-full !bg-white !text-gray-900 !border-white hover:!bg-gray-100 hover:!text-gray-800 focus:!outline-none focus:!ring-2 focus:!ring-white focus:!ring-offset-2 focus:!ring-offset-gray-900 !font-semibold !py-3 !rounded-md">
+                      登录
+                    </el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -20,16 +26,16 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
 import apiClient from '../../services/api';
-import { setToken } from '../../utils/cookie'; // 修改为导入setToken
-
+import { setToken } from '../../utils/cookie';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const isLoading = ref(false);
 
 const form = reactive({
     username: 'admin', // 测试用默认值
@@ -37,6 +43,7 @@ const form = reactive({
 });
 
 const handleLogin = async () => {
+    isLoading.value = true;
     try {
         // 添加请求参数日志
         console.log('[Login] Request payload:', { username: form.username, password: form.password });
@@ -58,7 +65,7 @@ const handleLogin = async () => {
         setToken(response.data.access_token); // 存储token到Cookie
         authStore.setUser(response.data.user);
         
-        router.push('/dashboard');
+        router.push({ name: 'Dashboard' });
     } catch (error) {
         console.error('登录失败:', error);
         console.error('[Login] Full error details:', error);
@@ -66,6 +73,8 @@ const handleLogin = async () => {
         if (error.response) {
             console.error('[Login] Error response data:', error.response.data);
         }
+    } finally {
+        isLoading.value = false;
     }
 };
 </script>
