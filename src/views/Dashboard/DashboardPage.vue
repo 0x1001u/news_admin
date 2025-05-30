@@ -43,7 +43,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import apiClient from '../../services/api';
+import dashboardService from '../../services/dashboard';
 import { ElMessage } from 'element-plus';
 import { Document, User, ChatDotRound } from '@element-plus/icons-vue';
 import { getToken } from '../../utils/cookie';
@@ -58,25 +58,19 @@ const isLoading = ref(true);
 
 const loadData = async () => {
     try {
-        // Fetch news count
-        const newsResponse = await apiClient.get('/news/', { params: { limit: 1 } });
-        newsCount.value = parseInt(newsResponse.headers['x-total-count'] || 0);
-
-        // Fetch user count
-        const usersResponse = await apiClient.get('/users/', { params: { limit: 1 } });
-        userCount.value = parseInt(usersResponse.headers['x-total-count'] || 0);
-
-        // Fetch comment count
-        const commentsResponse = await apiClient.get('/comments/', { params: { limit: 1 } });
-        commentCount.value = parseInt(commentsResponse.headers['x-total-count'] || 0);
-
+        const response = await dashboardService.getDashboardData();
+        newsCount.value = response.data.newsCount;
+        userCount.value = response.data.userCount;
+        commentCount.value = response.data.commentCount;
     } catch (error) {
         if (error.response?.status === 401) {
             console.error('认证过期，请重新登录');
+        } else if (error.response?.status === 404) {
+            console.error('API端点不存在，请检查配置');
         } else {
             console.error('数据获取失败，请重试', error);
-            ElMessage.error('获取仪表盘数据失败！');
         }
+        ElMessage.error('获取仪表盘数据失败！');
     }
 };
 
