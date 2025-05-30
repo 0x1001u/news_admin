@@ -17,7 +17,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getToken } from '@/utils/cookie';
-import { useAuthStore } from '../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
 const token = ref('');
 const userInfo = ref('');
