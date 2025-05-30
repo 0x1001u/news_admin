@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', {
         // 从API获取当前用户信息
         async fetchCurrentUser() {
             try {
-                const response = await apiClient.get('/api/v1/users/me');
+                const response = await apiClient.get('/api/v1/auth/me');
                 if (response.data) {
                     this.user = response.data;
                     setCookie('user_info', JSON.stringify(response.data), 7);
