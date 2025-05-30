@@ -7,13 +7,14 @@
             </div>
             <el-button
                 type="danger"
-                @click="logout"
+                @click="handleLogout"
                 class="!bg-red-600 hover:!bg-red-700 !border-red-600">
                 退出登录
             </el-button>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <el-skeleton v-if="isLoading" animated />
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <el-card class="text-center bg-gray-800 border-gray-700 text-gray-100 rounded-xl shadow-lg">
                 <div class="flex items-center justify-center mb-2">
                     <el-icon class="text-5xl text-primary-500 mr-2"><Document /></el-icon>
@@ -42,20 +43,23 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
+import apiClient from '../../services/api';
 import { ElMessage } from 'element-plus';
 import { Document, User, ChatDotRound } from '@element-plus/icons-vue';
-import { getToken, deleteCookie } from '../../utils/cookie';
+import { getToken } from '../../utils/cookie';
+import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const newsCount = ref(0);
 const userCount = ref(0);
 const commentCount = ref(0);
+const isLoading = ref(true);
 
-const fetchDashboardData = async () => {
+const loadData = async () => {
     try {
         // Fetch news count
-        const newsResponse = await apiClient.get('/news/', { params: { limit: 1 } }); // Fetch one to get total count from header
+        const newsResponse = await apiClient.get('/news/', { params: { limit: 1 } });
         newsCount.value = parseInt(newsResponse.headers['x-total-count'] || 0);
 
         // Fetch user count
@@ -67,22 +71,28 @@ const fetchDashboardData = async () => {
         commentCount.value = parseInt(commentsResponse.headers['x-total-count'] || 0);
 
     } catch (error) {
-        ElMessage.error('获取仪表盘数据失败！');
-        console.error('[Dashboard] API Error:', error.response?.data || error.message);
+        if (error.response?.status === 401) {
+            console.error('认证过期，请重新登录');
+        } else {
+            console.error('数据获取失败，请重试', error);
+            ElMessage.error('获取仪表盘数据失败！');
+        }
     }
 };
 
-const logout = () => {
-    deleteCookie('token');
+// 仅在用户主动登出时调用
+const handleLogout = () => {
+    authStore.logout();
     router.push({ name: 'Login' });
 };
 
-onMounted(() => {
+onMounted(async () => {
     if (!getToken()) {
         router.push({ name: 'Login' });
     } else {
-        fetchDashboardData();
+        await loadData();
     }
+    isLoading.value = false;
 });
 </script>
 

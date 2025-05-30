@@ -77,7 +77,6 @@ export const useAuthStore = defineStore('auth', {
             deleteCookie('user_info');
             deleteCookie('token'); // 删除token cookie
             ElMessage.info('您已登出。');
-            router.push('/login');
         }
         
     },
