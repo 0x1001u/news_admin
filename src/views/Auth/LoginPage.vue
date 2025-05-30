@@ -55,22 +55,16 @@ const handleLogin = async () => {
         // 存储token到cookie
         const token = response.data.access_token;
         setCookie('token', token, 7);
-        console.log('登录成功，token:', token); // 调试日志
+        console.log('登录成功，token:', token);
         console.log('[Login] Response data:', response.data);
-        console.log('[Login] Set token:', response.data.access_token);
 
-        // 使用新的login API - 传递完整用户对象
-        authStore.login(response.data.user, token); // 存储完整用户对象
-        const userId = response.data.user.id; // 获取用户ID
-
-        // 使用新的用户信息获取端点
-        const userInfo = await userService.getUser(userId);
-        console.log('[Login] User info:', userInfo);
-
+        // 初始化认证状态（会从cookie加载用户信息）
+        authStore.initialize();
+        
         router.push('/dashboard');
     } catch (error) {
         console.error('登录失败:', error);
-        console.error('[Login] Full error details:', error.toJSON());
+        console.error('[Login] Full error details:', error);
     }
 };
 </script>

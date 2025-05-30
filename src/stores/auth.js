@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ElMessage } from 'element-plus';
 import router from '../router';
 import { getCookie, setCookie, deleteCookie } from '../utils/cookie';
+import apiClient from '../services/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -14,7 +15,7 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
         // 初始化时从cookie加载用户状态
-        initialize() {
+        async initialize() {
             try {
                 const storedUser = getCookie('user_info');
                 if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
@@ -23,10 +24,29 @@ export const useAuthStore = defineStore('auth', {
                 // 调试日志：输出token值
                 const token = getCookie('token');
                 console.log('初始化token:', token);
+                
+                // 如果token存在但用户信息不存在，则获取当前用户信息
+                if (token && !this.user) {
+                    await this.fetchCurrentUser();
+                }
             } catch (error) {
                 console.error('用户信息解析失败:', error);
                 this.user = null;
                 deleteCookie('user_info');
+            }
+        },
+        
+        // 从API获取当前用户信息
+        async fetchCurrentUser() {
+            try {
+                const response = await apiClient.get('/api/v1/users/me');
+                if (response.data) {
+                    this.user = response.data;
+                    setCookie('user_info', JSON.stringify(response.data), 7);
+                    console.log('成功获取用户信息:', response.data);
+                }
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
             }
         },
         
