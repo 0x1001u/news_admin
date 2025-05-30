@@ -26,7 +26,7 @@ import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
 import apiClient from '../../services/api';
 import { setCookie } from '../../utils/cookie'; // 添加setCookie导入
-import { userService } from '../../services/users'; // 导入userService
+import { authService } from '../../services/auth'; // 导入authService
 
 
 const authStore = useAuthStore();
@@ -61,8 +61,9 @@ const handleLogin = async () => {
         console.log('登录成功，token:', token);
         console.log('[Login] Response data:', response.data);
 
-        // 初始化认证状态（会从cookie加载用户信息）
-        authStore.initialize();
+        // 获取当前用户信息并存储
+        const userInfo = await authService.getCurrentUser();
+        authStore.setUser(userInfo.data);
         
         router.push('/dashboard');
     } catch (error) {

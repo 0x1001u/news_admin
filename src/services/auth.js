@@ -76,10 +76,7 @@ export const authService = {
      * 获取当前用户信息。
      * @returns {Promise<object>} - 当前用户的详细信息。
      */
-    async getMe() {
-        const response = await ApiClient.get('/users/me');
-        return response.data;
-    },
+    getCurrentUser: () => ApiClient.get('/auth/me'),
 
     /**
      * 用户注册。
