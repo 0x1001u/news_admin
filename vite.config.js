@@ -7,6 +7,12 @@ export default defineConfig({
     // 这告诉 Vite 在哪里寻找 'public' 和 'src' 文件夹。
     root: process.cwd(),
     plugins: [vue()],
+    // 配置路径别名
+    resolve: {
+        alias: {
+            '@': path.resolve(process.cwd(), 'src')
+        }
+    },
     // 显式设置公共基础路径。
     // 对于部署在域名根目录的 SPA 应用（如 Cloudflare Pages），通常设置为 '/'。
     base: '/',
