@@ -1,4 +1,4 @@
-import { getToken } from '../../utils/cookie';
+import { getToken, validateToken } from '../../utils/cookie';
 
 /**
  * 认证拦截器
@@ -7,6 +7,14 @@ import { getToken } from '../../utils/cookie';
  */
 export default function authInterceptor(config) {
   const token = getToken();
+  console.log('[AuthInterceptor] Attaching token to:', config.url);
+  console.log('[AuthInterceptor] Token value:', token);
+  
+  if (!validateToken(token)) {
+    console.error('[AuthInterceptor] Invalid token, skipping');
+    return config;
+  }
+  
   console.log('[AuthInterceptor] Full config:', config);
   console.log('[AuthInterceptor] Token existence:', !!token);
   

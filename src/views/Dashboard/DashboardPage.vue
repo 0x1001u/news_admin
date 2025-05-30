@@ -54,7 +54,7 @@ const fetchDashboardData = async () => {
 
     } catch (error) {
         ElMessage.error('获取仪表盘数据失败！');
-        console.error('Failed to fetch dashboard data:', error);
+        console.error('[Dashboard] API Error:', error.response?.data || error.message);
     }
 };
 

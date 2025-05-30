@@ -25,8 +25,7 @@ import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
 import apiClient from '../../services/api';
-import { setCookie } from '../../utils/cookie'; // 添加setCookie导入
-import { authService } from '../../services/auth'; // 导入authService
+import { setToken } from '../../utils/cookie'; // 修改为导入setToken
 
 
 const authStore = useAuthStore();
@@ -56,14 +55,8 @@ const handleLogin = async () => {
         console.log('[Login] Response data keys:', Object.keys(response.data));
         console.log('[Login] Response data content:', JSON.stringify(response.data, null, 2));
         // 存储token到cookie
-        const token = response.data.access_token;
-        setCookie('token', token, 7);
-        console.log('登录成功，token:', token);
-        console.log('[Login] Response data:', response.data);
-
-        // 获取当前用户信息并存储
-        const userInfo = await authService.getCurrentUser();
-        authStore.setUser(userInfo.data);
+        setToken(response.data.access_token); // 存储token到Cookie
+        authStore.setUser(response.data.user);
         
         router.push('/dashboard');
     } catch (error) {
