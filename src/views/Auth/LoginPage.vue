@@ -61,12 +61,8 @@ const handleLogin = async () => {
         // 详细记录响应结构
         console.log('[Login] Response data keys:', Object.keys(response.data));
         console.log('[Login] Response data content:', JSON.stringify(response.data, null, 2));
-        // 存储token到cookie
-        authStore.login(response.data.user, response.data.access_token);
-        
-        // 等待状态更新
-        await nextTick();
-        
+        // 直接设置token到cookie
+        setToken(response.data.access_token);
         router.push({ name: 'Dashboard' });
     } catch (error) {
         console.error('登录失败:', error);

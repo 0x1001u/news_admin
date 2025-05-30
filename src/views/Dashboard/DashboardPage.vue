@@ -1,7 +1,18 @@
 <template>
     <div class="p-8 bg-gray-900 rounded-xl shadow-lg border border-gray-800">
-        <h1 class="text-3xl font-extrabold text-primary-500 mb-4">仪表盘</h1>
-        <p class="text-gray-400 mb-8">欢迎来到新闻资讯平台管理后台！</p>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-primary-500 mb-2">仪表盘</h1>
+                <p class="text-gray-400">欢迎来到新闻资讯平台管理后台！</p>
+            </div>
+            <el-button
+                type="danger"
+                @click="logout"
+                class="!bg-red-600 hover:!bg-red-700 !border-red-600">
+                退出登录
+            </el-button>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <el-card class="text-center bg-gray-800 border-gray-700 text-gray-100 rounded-xl shadow-lg">
                 <div class="flex items-center justify-center mb-2">
@@ -30,10 +41,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import apiClient from '../../services/api'; // 确保导入了实际的 API 客户端
 import { ElMessage } from 'element-plus';
 import { Document, User, ChatDotRound } from '@element-plus/icons-vue';
+import { getToken, deleteCookie } from '../../utils/cookie';
 
+const router = useRouter();
 const newsCount = ref(0);
 const userCount = ref(0);
 const commentCount = ref(0);
@@ -58,8 +72,17 @@ const fetchDashboardData = async () => {
     }
 };
 
+const logout = () => {
+    deleteCookie('token');
+    router.push({ name: 'Login' });
+};
+
 onMounted(() => {
-    fetchDashboardData();
+    if (!getToken()) {
+        router.push({ name: 'Login' });
+    } else {
+        fetchDashboardData();
+    }
 });
 </script>
 

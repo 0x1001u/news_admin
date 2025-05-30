@@ -142,33 +142,34 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore();
-    
-    // 等待状态稳定
-    await nextTick();
-    
-    const isAuthenticated = authStore.isAuthenticated;
-    const isAdmin = authStore.isAdmin;
-
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        // 如果路由需要认证但用户未认证，则重定向到登录页
-        ElMessage.warning('请先登录以访问此页面。');
-        next('/login');
-    } else if (to.meta.requiresAdmin && !isAdmin) {
-        // 如果路由需要管理员权限但用户不是管理员，则重定向到仪表盘
-        ElMessage.warning('您没有权限访问此页面。');
-        next('/dashboard');
-    } else if (to.meta.hideForAuth && isAuthenticated) {
-        // 如果路由在认证用户下应隐藏（如登录页），则重定向到仪表盘
-        next('/dashboard');
-    } else if (to.name === 'Login' && isAuthenticated) {
-        // 如果用户已认证但访问登录页，则重定向到仪表盘
-        next('/dashboard');
-    } else {
-        // 否则，正常进行导航
-        next();
-    }
-});
+// 路由守卫已注释掉 - 认证流程重构
+// router.beforeEach(async (to, from, next) => {
+//     const authStore = useAuthStore();
+//
+//     // 等待状态稳定
+//     await nextTick();
+//
+//     const isAuthenticated = authStore.isAuthenticated;
+//     const isAdmin = authStore.isAdmin;
+//
+//     if (to.meta.requiresAuth && !isAuthenticated) {
+//         // 如果路由需要认证但用户未认证，则重定向到登录页
+//         ElMessage.warning('请先登录以访问此页面。');
+//         next('/login');
+//     } else if (to.meta.requiresAdmin && !isAdmin) {
+//         // 如果路由需要管理员权限但用户不是管理员，则重定向到仪表盘
+//         ElMessage.warning('您没有权限访问此页面。');
+//         next('/dashboard');
+//     } else if (to.meta.hideForAuth && isAuthenticated) {
+//         // 如果路由在认证用户下应隐藏（如登录页），则重定向到仪表盘
+//         next('/dashboard');
+//     } else if (to.name === 'Login' && isAuthenticated) {
+//         // 如果用户已认证但访问登录页，则重定向到仪表盘
+//         next('/dashboard');
+//     } else {
+//         // 否则，正常进行导航
+//         next();
+//     }
+// });
 
 export default router;
