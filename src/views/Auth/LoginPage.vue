@@ -42,7 +42,7 @@ const handleLogin = async () => {
         // 添加请求参数日志
         console.log('[Login] Request payload:', { username: form.username, password: form.password });
         
-        const response = await apiClient.post('/api/v1/auth/login', new URLSearchParams({
+        const response = await apiClient.post('/auth/login', new URLSearchParams({
             username: form.username,
             password: form.password
         }), {
