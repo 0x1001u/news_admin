@@ -6,6 +6,7 @@ import { getCookie, setCookie, deleteCookie } from '../utils/cookie';
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null, // 统一使用user状态管理
+        userId: null // 新增用户ID存储
     }),
     getters: {
         isAuthenticated: (state) => !!state.user,
@@ -33,6 +34,7 @@ export const useAuthStore = defineStore('auth', {
         login(userData, token) {
             try {
                 this.user = userData;
+                this.userId = userData.id; // 存储用户ID
                 setCookie('user_info', JSON.stringify(userData), 7);
                 setCookie('token', token, 7); // 存储token
                 console.log('登录成功，存储的token:', token); // 调试日志
@@ -44,6 +46,7 @@ export const useAuthStore = defineStore('auth', {
         
         logout() {
             this.user = null;
+            this.userId = null; // 清除用户ID
             deleteCookie('user_info');
             deleteCookie('token'); // 删除token cookie
             ElMessage.info('您已登出。');

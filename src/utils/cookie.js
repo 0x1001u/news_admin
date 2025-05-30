@@ -4,6 +4,7 @@
  * These functions are for setting and deleting cookies that can be accessed.
  */
 
+console.log('[Cookie] Domain:', import.meta.env.VITE_COOKIE_DOMAIN || window.location.hostname);
 export const setCookie = (name, value, days) => {
     const expires = new Date();
     expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);

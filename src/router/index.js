@@ -17,6 +17,7 @@ const CategoryFormPage = () => import('../views/Categories/CategoryFormPage.vue'
 const TagListPage = () => import('../views/Tags/TagListPage.vue');
 const TagFormPage = () => import('../views/Tags/TagFormPage.vue');
 const CommentListPage = () => import('../views/Comments/CommentListPage.vue');
+const DebugPage = () => import('../views/DebugPage.vue');
 
 const routes = [
     {
@@ -31,6 +32,12 @@ const routes = [
         redirect: '/dashboard',
         meta: { requiresAuth: true },
         children: [
+            {
+                path: 'debug',
+                name: 'Debug',
+                component: DebugPage,
+                meta: { requiresAuth: true }
+            },
             {
                 path: 'dashboard',
                 name: 'Dashboard',

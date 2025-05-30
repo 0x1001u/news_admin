@@ -26,6 +26,7 @@ import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
 import apiClient from '../../services/api';
 import { setCookie } from '../../utils/cookie'; // 添加setCookie导入
+import { userService } from '../../services/users'; // 导入userService
 
 
 const authStore = useAuthStore();
@@ -50,21 +51,23 @@ const handleLogin = async () => {
             }
         });
 
-        // 获取用户信息
-        const userResponse = await apiClient.get('/api/v1/users/me');
-        const user = userResponse.data;
-
+        console.log('[Login] Full response:', response);
         // 存储token到cookie
-        const token = response.data.access_token; // 假设token在响应中
+        const token = response.data.access_token;
         setCookie('token', token, 7);
         console.log('登录成功，token:', token); // 调试日志
         console.log('[Login] Response data:', response.data);
         console.log('[Login] Set token:', response.data.access_token);
 
-        // 使用新的login API
-        authStore.login(user, token); // 传递token
-        router.push('/dashboard');
+        // 使用新的login API - 传递完整用户对象
+        authStore.login(response.data.user, token); // 存储完整用户对象
+        const userId = response.data.user.id; // 获取用户ID
 
+        // 使用新的用户信息获取端点
+        const userInfo = await userService.getUser(userId);
+        console.log('[Login] User info:', userInfo);
+
+        router.push('/dashboard');
     } catch (error) {
         console.error('登录失败:', error);
         console.error('[Login] Full error details:', error.toJSON());
