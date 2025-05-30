@@ -32,7 +32,7 @@ export const authService = {
         formData.append('password', password);
 
         try {
-            const response = await ApiClient.post('/api/v1/auth/login', formData.toString(), {
+            const response = await ApiClient.post('/auth/login', formData.toString(), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -58,7 +58,7 @@ export const authService = {
      */
     async logout() {
         try {
-            await ApiClient.post('/api/v1/auth/logout');
+            await ApiClient.post('/auth/logout');
             deleteCookie('user_info');
         } catch (error) {
             if (error.response) {

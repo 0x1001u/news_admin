@@ -3,7 +3,7 @@ import errorHandler from './ErrorHandler';
 import authInterceptor from './AuthInterceptor';
 
 const ApiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://newsdb.hacko.tech',
   timeout: 10000,
   withCredentials: true, // 添加凭证配置
   headers: {
