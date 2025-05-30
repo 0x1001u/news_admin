@@ -52,6 +52,9 @@ const handleLogin = async () => {
         });
 
         console.log('[Login] Full response:', response);
+        // 详细记录响应结构
+        console.log('[Login] Response data keys:', Object.keys(response.data));
+        console.log('[Login] Response data content:', JSON.stringify(response.data, null, 2));
         // 存储token到cookie
         const token = response.data.access_token;
         setCookie('token', token, 7);
@@ -65,6 +68,10 @@ const handleLogin = async () => {
     } catch (error) {
         console.error('登录失败:', error);
         console.error('[Login] Full error details:', error);
+        // 记录错误响应数据（如果存在）
+        if (error.response) {
+            console.error('[Login] Error response data:', error.response.data);
+        }
     }
 };
 </script>

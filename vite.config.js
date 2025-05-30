@@ -10,7 +10,8 @@ export default defineConfig({
     // 配置路径别名
     resolve: {
         alias: {
-            '@': path.resolve(process.cwd(), 'src')
+            '@': path.resolve(process.cwd(), 'src'),
+            'stores': path.resolve(process.cwd(), 'src/stores')
         }
     },
     // 显式设置公共基础路径。
