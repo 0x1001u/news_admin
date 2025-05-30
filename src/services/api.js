@@ -3,7 +3,7 @@ import { useAuthStore } from '../stores/auth';
 import { ElMessage } from 'element-plus';
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_APP_API_BASE_URL, // 从环境变量读取后端地址
+    baseURL: import.meta.env.VITE_API_BASE_URL, // 从环境变量读取后端地址
     headers: {
         'Content-Type': 'application/json',
     },
