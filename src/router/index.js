@@ -144,9 +144,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
 
-    // Since token is now in HttpOnly cookie, we only need to check user info
-    const isAuthenticated = !!authStore.user;
-    const isAdmin = authStore.user && authStore.user.is_superuser;
+    // Use the isAuthenticated getter from the auth store
+    const isAuthenticated = authStore.isAuthenticated;
+    const isAdmin = authStore.isAdmin;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         // 如果路由需要认证但用户未认证，则重定向到登录页

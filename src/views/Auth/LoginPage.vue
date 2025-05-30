@@ -62,8 +62,7 @@ const handleLogin = async () => {
         console.log('[Login] Response data keys:', Object.keys(response.data));
         console.log('[Login] Response data content:', JSON.stringify(response.data, null, 2));
         // 存储token到cookie
-        setToken(response.data.access_token); // 存储token到Cookie
-        authStore.setUser(response.data.user);
+        authStore.login(response.data.user, response.data.access_token);
         
         router.push({ name: 'Dashboard' });
     } catch (error) {
