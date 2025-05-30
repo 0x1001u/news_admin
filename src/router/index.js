@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { nextTick } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { ElMessage } from 'element-plus';
 
@@ -141,10 +142,12 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
-
-    // Use the isAuthenticated getter from the auth store
+    
+    // 等待状态稳定
+    await nextTick();
+    
     const isAuthenticated = authStore.isAuthenticated;
     const isAdmin = authStore.isAdmin;
 
@@ -158,6 +161,9 @@ router.beforeEach((to, from, next) => {
         next('/dashboard');
     } else if (to.meta.hideForAuth && isAuthenticated) {
         // 如果路由在认证用户下应隐藏（如登录页），则重定向到仪表盘
+        next('/dashboard');
+    } else if (to.name === 'Login' && isAuthenticated) {
+        // 如果用户已认证但访问登录页，则重定向到仪表盘
         next('/dashboard');
     } else {
         // 否则，正常进行导航

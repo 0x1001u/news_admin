@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
@@ -63,6 +63,9 @@ const handleLogin = async () => {
         console.log('[Login] Response data content:', JSON.stringify(response.data, null, 2));
         // 存储token到cookie
         authStore.login(response.data.user, response.data.access_token);
+        
+        // 等待状态更新
+        await nextTick();
         
         router.push({ name: 'Dashboard' });
     } catch (error) {

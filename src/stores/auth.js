@@ -33,6 +33,11 @@ export const useAuthStore = defineStore('auth', {
                 this.user = null;
                 deleteCookie('user_info');
             }
+            
+            // 添加状态变更监听
+            this.$subscribe((mutation, state) => {
+                console.log('[AuthStore] User state changed:', state.user);
+            });
         },
         
         // 从API获取当前用户信息
@@ -74,5 +79,6 @@ export const useAuthStore = defineStore('auth', {
             ElMessage.info('您已登出。');
             router.push('/login');
         }
+        
     },
 });
