@@ -9,15 +9,23 @@ export const registerUser = async (data: { username: string; email: string; pass
 // 用户登录
 export const login = async (credentials: { username: string; password: string }) => {
   try {
-    const response = await api.post('/auth/login', {
-      grant_type: 'password', // 添加grant_type
-      username: credentials.username,
-      password: credentials.password
+    // 创建URL编码的请求体
+    const params = new URLSearchParams();
+    params.append('grant_type', 'password');
+    params.append('username', credentials.username);
+    params.append('password', credentials.password);
+
+    const response = await api.post('/auth/login', params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded' // 修正请求头
+      }
     });
-    // 确保正确获取access_token
+    
     return response.data.access_token;
-  } catch (error) {
-    throw new Error('Login failed');
+  } catch (error: any) {
+    // 输出详细错误信息
+    console.error('Login error details:', error.response?.data);
+    throw new Error('Login failed: ' + (error.response?.data?.detail || error.message));
   }
 };
 
