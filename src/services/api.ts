@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { ApiResponse, DashboardStats, Activity } from '@/types';
 
 declare global {
   interface Window {
@@ -35,3 +36,22 @@ api.interceptors.response.use(response => response, error => {
 });
 
 export default api;
+// 获取仪表盘统计数据
+export const getDashboardStats = async (): Promise<ApiResponse<DashboardStats>> => {
+  try {
+    const response = await api.get('/dashboard/stats');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch dashboard stats');
+  }
+};
+
+// 获取最近活动
+export const getRecentActivities = async (): Promise<ApiResponse<Activity[]>> => {
+  try {
+    const response = await api.get('/dashboard/activities');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch recent activities');
+  }
+};

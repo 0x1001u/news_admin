@@ -39,16 +39,29 @@ export const updateComment = async (id: number, data: Partial<Omit<Comment, 'id'
   return response.data;
 };
 
+
+// 按新闻ID获取评论
+export const getCommentsByNewsId = async (newsId: number) => {
+  return getComments({ newsId });
+};
+
 // 删除评论
 export const deleteComment = async (id: number) => {
   const response = await api.delete(`/comments/${id}`);
   return response.data;
 };
-
-export const commentService = {
-  getComments,
-  getComment,
-  createComment,
-  updateComment,
-  deleteComment
+// 批准评论
+export const approveComment = async (id: number) => {
+  const response = await api.patch(`/comments/${id}/approve`);
+  return response.data;
 };
+// 获取评论详情（别名函数）
+export const getCommentDetail = getComment;
+// 拒绝评论
+export const rejectComment = async (id: number) => {
+  const response = await api.patch(`/comments/${id}/reject`);
+  return response.data;
+};
+
+// 删除回复（复用删除评论函数）
+export const deleteReply = deleteComment;

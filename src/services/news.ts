@@ -45,3 +45,14 @@ export const newsService = {
   updateNews,
   deleteNews
 };
+// 更新新闻状态
+export const updateNewsStatus = async (id: number, status: string): Promise<ApiResponse<void>> => {
+  try {
+    const response = await api.patch(`/news/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update news status');
+  }
+};
+// 获取单个新闻（别名函数）
+export const getNewsById = getNews;

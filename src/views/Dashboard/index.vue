@@ -40,8 +40,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
-import { getDashboardStats, getRecentActivities } from '@/services/api'
-import type { DashboardStats, Activity } from '@/types'
+import { getDashboardStats, getRecentActivities } from '@/services/api';
+import type { DashboardStats, Activity } from '@/types';
 
 export default defineComponent({
   name: 'DashboardView',
