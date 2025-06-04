@@ -159,9 +159,10 @@ router.beforeEach(async (to, from, next) => {
   }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
-    next('/dashboard')
+    next({ name: 'Login', query: { redirect: to.fullPath } });
+  } else if (to.name === 'Login' && authStore.isAuthenticated) {
+    // 已登录时访问登录页，重定向到仪表盘
+    next({ name: 'Dashboard' });
   } else if (to.meta.requiresAdmin && authStore.userData?.role !== 'admin') {
     next('/dashboard')
   } else if (to.meta.roles) {

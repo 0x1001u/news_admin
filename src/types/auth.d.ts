@@ -3,3 +3,7 @@ export interface LoginCredentials {
   password: string;
   remember?: boolean;
 }
+export interface Token {
+  access_token: string;
+  token_type: string;
+}

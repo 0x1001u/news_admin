@@ -19,9 +19,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
+const route = useRoute()
 const loginForm = ref(null)
 const loading = ref(false)
 const error = ref('')
@@ -46,7 +49,10 @@ const handleLogin = async () => {
       password: form.value.password
     })
     ElMessage.success('登录成功')
-    // 这里可以添加路由跳转逻辑
+    
+    // 状态更新后立即跳转
+    const redirect = route.query.redirect as string || { name: 'Dashboard' }
+    router.push(redirect)
   } catch (err: any) {
     error.value = err.response?.data?.message || err.message || '登录失败，请重试'
     ElMessage.error(error.value)

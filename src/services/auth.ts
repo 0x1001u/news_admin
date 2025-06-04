@@ -7,24 +7,27 @@ export const registerUser = async (data: { username: string; email: string; pass
 };
 
 // 用户登录
-export const login = async (credentials: { username: string; password: string }) => {
+import type { Token } from '@/types/auth';
+
+export const login = async (credentials: { email: string; password: string }): Promise<Token> => {
   try {
-    // 创建URL编码的请求体
     const params = new URLSearchParams();
-    params.append('grant_type', 'password');
-    params.append('username', credentials.username);
+    params.append('email', credentials.email);
     params.append('password', credentials.password);
 
-    const response = await api.post('/auth/login', params, {
+    const response = await api.post('/api/v1/auth/login', params, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded' // 修正请求头
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
     
-    return response.data.access_token;
+    // 返回完整Token对象
+    return {
+      access_token: response.data.token,
+      token_type: response.data.token_type || 'Bearer' // 默认值
+    };
   } catch (error: any) {
-    // 输出详细错误信息
-    console.error('Login error details:', error.response?.data);
+    console.error('Login error:', error.response?.data);
     throw new Error('Login failed: ' + (error.response?.data?.detail || error.message));
   }
 };
