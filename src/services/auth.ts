@@ -15,6 +15,12 @@ export const login = async (credentials: { email: string; password: string }): P
     params.append('email', credentials.email);
     params.append('password', credentials.password);
 
+    // 添加API可能需要的可选参数
+    params.append('grant_type', 'password');
+    params.append('scope', '');
+    params.append('client_id', '');
+    params.append('client_secret', '');
+
     const response = await api.post('/api/v1/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -27,8 +33,18 @@ export const login = async (credentials: { email: string; password: string }): P
       token_type: response.data.token_type || 'Bearer' // 默认值
     };
   } catch (error: any) {
-    console.error('Login error:', error.response?.data);
-    throw new Error('Login failed: ' + (error.response?.data?.detail || error.message));
+    let errorMsg = 'Login failed';
+    if (error.response?.data?.detail) {
+      // 处理验证错误数组
+      if (Array.isArray(error.response.data.detail)) {
+        errorMsg = error.response.data.detail
+          .map((err: any) => `${err.loc.join('.')}: ${err.msg}`)
+          .join('; ');
+      } else {
+        errorMsg = error.response.data.detail;
+      }
+    }
+    throw new Error(errorMsg);
   }
 };
 

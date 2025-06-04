@@ -5,3 +5,13 @@ export interface ApiError {
     type: string;
   }>;
 }
+
+export interface ValidationError {
+  loc: string[];
+  msg: string;
+  type: string;
+}
+
+export interface HTTPValidationError {
+  detail: ValidationError[] | string;
+}
