@@ -10,15 +10,18 @@ export const registerUser = async (data: { username: string; email: string; pass
 // 用户登录
 export const login = async (credentials: { username: string; password: string }): Promise<Token> => {
   try {
-    // 使用方括号语法表示嵌套对象
-    const params = new URLSearchParams();
-    params.append('body[username]', credentials.username);
-    params.append('body[password]', credentials.password);
-    params.append('body[grant_type]', 'password');
+    // 构建精确嵌套结构
+    const requestBody = {
+      body: {
+        username: credentials.username,
+        password: credentials.password,
+        grant_type: 'password'
+      }
+    };
     
-    const response = await api.post('/api/v1/auth/login', params, {
+    const response = await api.post('/api/v1/auth/login', requestBody, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json' // 必须使用JSON格式
       }
     });
     

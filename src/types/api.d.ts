@@ -16,8 +16,12 @@ export interface HTTPValidationError {
   detail: ValidationError[] | string;
 }
 // 添加嵌套body参数类型
-export interface LoginParams {
-  'body[username]': string;
-  'body[password]': string;
-  'body[grant_type]'?: string;
+export interface LoginCredentials {
+  username: string;
+  password: string;
+  grant_type?: string;
+}
+
+export interface LoginRequest {
+  body: LoginCredentials;
 }
