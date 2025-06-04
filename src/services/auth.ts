@@ -1,4 +1,5 @@
 import api from './api';
+import type { Token } from '@/types/auth';
 
 // 用户注册
 export const registerUser = async (data: { username: string; email: string; password: string }) => {
@@ -7,15 +8,13 @@ export const registerUser = async (data: { username: string; email: string; pass
 };
 
 // 用户登录
-import type { Token } from '@/types/auth';
-
 export const login = async (credentials: { username: string; password: string }): Promise<Token> => {
   try {
-    // 精确匹配API要求的参数名
+    // 使用方括号语法表示嵌套对象
     const params = new URLSearchParams();
-    params.append('body.username', credentials.username);
-    params.append('body.password', credentials.password);
-    params.append('body.grant_type', 'password');
+    params.append('body[username]', credentials.username);
+    params.append('body[password]', credentials.password);
+    params.append('body[grant_type]', 'password');
     
     const response = await api.post('/api/v1/auth/login', params, {
       headers: {
@@ -25,11 +24,16 @@ export const login = async (credentials: { username: string; password: string })
     
     return response.data;
   } catch (error: any) {
+    // 错误处理保持不变
     let errorMsg = 'Login failed';
     if (error.response?.data?.detail) {
-      errorMsg = Array.isArray(error.response.data.detail)
-        ? error.response.data.detail.map((err: any) => err.msg).join('; ')
-        : error.response.data.detail;
+      if (Array.isArray(error.response.data.detail)) {
+        errorMsg = error.response.data.detail
+          .map((err: any) => `${err.loc.join('.')}: ${err.msg}`)
+          .join('; ');
+      } else {
+        errorMsg = error.response.data.detail;
+      }
     }
     throw new Error(errorMsg);
   }
