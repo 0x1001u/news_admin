@@ -1,28 +1,17 @@
 import api from './api';
-
-// 新闻类型定义
-export interface News {
-  id: number;
-  title: string;
-  content: string;
-  categoryId: number;
-  authorId: number;
-  isPublished: boolean;
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  tags?: number[];
-}
+import type { NewsItem, NewsQueryParams } from '@/types';
+import type { ApiResponse } from '@/types';
 
 // 获取新闻列表
-export const getNewsList = async (params?: { 
-  page?: number; 
-  limit?: number;
-  categoryId?: number;
-  authorId?: number;
-}) => {
-  const response = await api.get('/news', { params });
-  return response.data;
+export const getNewsList = async (
+  params: NewsQueryParams
+): Promise<ApiResponse<NewsItem[]>> => {
+  try {
+    const response = await api.get('/news', { params });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch news');
+  }
 };
 
 // 获取单个新闻
@@ -32,13 +21,13 @@ export const getNews = async (id: number) => {
 };
 
 // 创建新闻
-export const createNews = async (data: Omit<News, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>) => {
+export const createNews = async (data: Omit<NewsItem, 'id' | 'created_at' | 'updated_at'>) => {
   const response = await api.post('/news', data);
   return response.data;
 };
 
 // 更新新闻
-export const updateNews = async (id: number, data: Partial<Omit<News, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>>) => {
+export const updateNews = async (id: number, data: Partial<Omit<NewsItem, 'id' | 'created_at' | 'updated_at'>>) => {
   const response = await api.put(`/news/${id}`, data);
   return response.data;
 };

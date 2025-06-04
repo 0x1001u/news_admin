@@ -75,6 +75,10 @@
           <el-button type="primary" @click="submitForm">保存</el-button>
           <el-button @click="cancel">取消</el-button>
         </el-form-item>
+        
+        <el-form-item label="内容预览">
+          <div class="preview" v-html="DOMPurify.sanitize(form.content)"></div>
+        </el-form-item>
       </el-form>
     </el-card>
   </div>
@@ -82,6 +86,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted, computed } from 'vue';
+import DOMPurify from 'dompurify';
 import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { QuillEditor } from '@vueup/vue-quill';
@@ -247,5 +252,13 @@ export default defineComponent({
 }
 .image-uploader {
   margin-top: 10px;
+}
+
+.preview {
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  padding: 20px;
+  margin-top: 10px;
+  min-height: 100px;
 }
 </style>

@@ -65,10 +65,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useUserStore } from '@/stores/user'
+import { useUsersStore } from '@/stores/usersStore'
 import type { User } from '@/types'
 
-const userStore = useUserStore()
+const usersStore = useUsersStore()
 const router = useRouter()
 
 const userList = ref<User[]>([])
@@ -85,7 +85,7 @@ onMounted(() => {
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const response = await userStore.fetchUsers({
+    const response = await usersStore.fetchUsers({
       page: currentPage.value,
       limit: pageSize.value,
       search: searchQuery.value
@@ -119,7 +119,7 @@ const handleDelete = async (id: number) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await userStore.deleteUser(id)
+    await usersStore.deleteUser(id)
     ElMessage.success('用户删除成功')
     fetchUsers()
   } catch (error) {

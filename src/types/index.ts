@@ -1,6 +1,8 @@
+export * from './news';
+export * from './category';
+
 // 认证相关类型
 export interface AuthState {
-  token: string | null;
   userData: User | null;
 }
 
@@ -17,4 +19,10 @@ export interface User {
 export interface UserState {
   userList: User[];
   currentUser: User | null;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  code: number;
 }

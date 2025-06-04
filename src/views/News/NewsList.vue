@@ -14,38 +14,46 @@
         <el-button type="primary" @click="fetchData">查询</el-button>
       </div>
 
-      <el-table :data="list" border>
-        <el-table-column prop="title" label="标题" />
-        <el-table-column prop="category.name" label="分类" />
-        <el-table-column prop="status" label="状态">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)">{{ row.status | statusText }}</el-tag>
+      <div class="table-container">
+        <table class="header-table">
+          <thead>
+            <tr>
+              <th>标题</th>
+              <th>分类</th>
+              <th>状态</th>
+              <th>发布时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+        </table>
+        <RecycleScroller
+          class="scroller"
+          :items="list"
+          :item-size="72"
+          key-field="id"
+        >
+          <template v-slot="{ item }">
+            <tr>
+              <td>{{ item.title }}</td>
+              <td>{{ item.category?.name }}</td>
+              <td>
+                <el-tag :type="statusTagType(item.status)">{{ item.status | statusText }}</el-tag>
+              </td>
+              <td>{{ item.published_at }}</td>
+              <td>
+                <el-button size="small" @click="handleEdit(item)">编辑</el-button>
+                <el-button size="small" type="danger" @click="handleDelete(item)">删除</el-button>
+                <el-button
+                  size="small"
+                  :type="item.status === 'published' ? 'warning' : 'success'"
+                  @click="toggleStatus(item)"
+                >
+                  {{ item.status === 'published' ? '归档' : '发布' }}
+                </el-button>
+              </td>
+            </tr>
           </template>
-        </el-table-column>
-        <el-table-column prop="published_at" label="发布时间" />
-        <el-table-column label="操作" width="220">
-          <template #default="{ row }">
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
-            <el-button 
-              size="small" 
-              :type="row.status === 'published' ? 'warning' : 'success'"
-              @click="toggleStatus(row)"
-            >
-              {{ row.status === 'published' ? '归档' : '发布' }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination 
-          :current-page="listQuery.page"
-          :page-size="listQuery.limit"
-          :total="total"
-          layout="total, prev, pager, next"
-          @current-change="handlePageChange"
-        />
+        </RecycleScroller>
       </div>
     </el-card>
   </div>
@@ -68,7 +76,7 @@ export default defineComponent({
     
     const listQuery = reactive({
       page: 1,
-      limit: 20,
+      limit: 500,
       title: '',
       category: '',
       status: '',
@@ -151,6 +159,12 @@ export default defineComponent({
   },
   filters: {
     statusText(status: string) {
+// 性能验证说明：
+  // 1. 确保后端API支持返回500条数据
+  // 2. 在浏览器开发者工具中打开Performance面板
+  // 3. 滚动列表并记录性能指标
+  // 4. 重点关注FPS、布局和渲染时间
+  // 5. 与未使用虚拟滚动前进行对比
       const statusMap: Record<string, string> = {
         draft: '草稿',
         published: '已发布',
@@ -166,8 +180,39 @@ export default defineComponent({
 .filter-container {
   margin-bottom: 20px;
 }
-.pagination-container {
-  margin-top: 20px;
-  text-align: right;
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.header-table th {
+  background-color: #f5f7fa;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.scroller {
+  height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.scroller tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.scroller tr td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ebeef5;
 }
 </style>

@@ -1,19 +1,20 @@
 import { defineStore } from 'pinia';
 import { reactive, toRefs, computed } from 'vue';
+import { useStorage } from '@vueuse/core';
 import type { AuthState, User } from '@/types';
 import { login, getMe } from '@/services/auth';
 
 export const useAuthStore = defineStore('auth', () => {
+  const token = useStorage<string | null>('auth_token', null);
   const state = reactive<AuthState>({
-    token: null,
     userData: null
   });
 
   const actions = {
     async login(credentials: { email: string; password: string }) {
       try {
-        const { token } = await login(credentials);
-        state.token = token;
+        const { token: newToken } = await login(credentials);
+        token.value = newToken;
         await actions.fetchUser();
       } catch (error) {
         console.error('Login failed:', error);
@@ -21,11 +22,11 @@ export const useAuthStore = defineStore('auth', () => {
       }
     },
     logout() {
-      state.token = null;
+      token.value = null;
       state.userData = null;
     },
     async fetchUser() {
-      if (!state.token) return;
+      if (!token.value) return;
       try {
         const userData = await getMe();
         state.userData = userData as User;
@@ -36,11 +37,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  const isAuthenticated = computed(() => !!state.token);
+  const isAuthenticated = computed(() => !!token.value);
 
   return {
     ...toRefs(state),
     ...actions,
+    token,
     isAuthenticated
   };
 });

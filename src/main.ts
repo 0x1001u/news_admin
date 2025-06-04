@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import piniaPluginPersist from 'pinia-plugin-persist'
+import piniaPersist from './plugins/piniaPersist'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import '@/assets/main.css'
@@ -8,7 +8,7 @@ import App from './App.vue'
 import router from './router'
 
 const pinia = createPinia()
-pinia.use(piniaPluginPersist)
+pinia.use(piniaPersist)
 
 const app = createApp(App)
 
@@ -20,6 +20,11 @@ app.config.errorHandler = (err) => {
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
+
+// 注册虚拟滚动组件
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+app.use(VueVirtualScroller)
 
 console.log('正在挂载Vue应用...')
 app.mount('#app')

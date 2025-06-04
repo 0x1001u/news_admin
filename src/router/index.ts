@@ -164,6 +164,14 @@ router.beforeEach(async (to, from, next) => {
     next('/dashboard')
   } else if (to.meta.requiresAdmin && authStore.userData?.role !== 'admin') {
     next('/dashboard')
+  } else if (to.meta.roles) {
+    // 添加角色检查
+    const userRole = authStore.userData?.role || 'guest'
+    if (!to.meta.roles.includes(userRole)) {
+      next({ name: 'Forbidden' }) // 需创建403页面
+    } else {
+      next()
+    }
   } else {
     next()
   }
