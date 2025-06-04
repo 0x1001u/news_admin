@@ -19,7 +19,7 @@ export const login = async (credentials: { username: string; password: string })
     params.append('client_id', ''); // 空值
     params.append('client_secret', ''); // 空值
     
-    const response = await api.post('/api/v1/auth/login', params, {
+    const response = await api.post('/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
