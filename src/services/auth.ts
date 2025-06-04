@@ -7,9 +7,18 @@ export const registerUser = async (data: { username: string; email: string; pass
 };
 
 // 用户登录
-export const login = async (credentials: { email: string; password: string }) => {
-  const response = await api.post('/auth/login', credentials);
-  return response.data;
+export const login = async (credentials: { username: string; password: string }) => {
+  try {
+    const response = await api.post('/auth/login', {
+      grant_type: 'password', // 添加grant_type
+      username: credentials.username,
+      password: credentials.password
+    });
+    // 确保正确获取access_token
+    return response.data.access_token;
+  } catch (error) {
+    throw new Error('Login failed');
+  }
 };
 
 // 获取当前用户信息

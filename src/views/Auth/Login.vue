@@ -42,7 +42,7 @@ const handleLogin = async () => {
   
   try {
     await authStore.login({
-      email: form.value.username,
+      username: form.value.username,
       password: form.value.password
     })
     ElMessage.success('登录成功')
