@@ -9,40 +9,27 @@ export const registerUser = async (data: { username: string; email: string; pass
 // 用户登录
 import type { Token } from '@/types/auth';
 
-export const login = async (credentials: { email: string; password: string }): Promise<Token> => {
+export const login = async (credentials: { username: string; password: string }): Promise<Token> => {
   try {
+    // 精确匹配API要求的参数名
     const params = new URLSearchParams();
-    params.append('email', credentials.email);
-    params.append('password', credentials.password);
-
-    // 添加API可能需要的可选参数
-    params.append('grant_type', 'password');
-    params.append('scope', '');
-    params.append('client_id', '');
-    params.append('client_secret', '');
-
+    params.append('body.username', credentials.username);
+    params.append('body.password', credentials.password);
+    params.append('body.grant_type', 'password');
+    
     const response = await api.post('/api/v1/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
     
-    // 返回完整Token对象
-    return {
-      access_token: response.data.token,
-      token_type: response.data.token_type || 'Bearer' // 默认值
-    };
+    return response.data;
   } catch (error: any) {
     let errorMsg = 'Login failed';
     if (error.response?.data?.detail) {
-      // 处理验证错误数组
-      if (Array.isArray(error.response.data.detail)) {
-        errorMsg = error.response.data.detail
-          .map((err: any) => `${err.loc.join('.')}: ${err.msg}`)
-          .join('; ');
-      } else {
-        errorMsg = error.response.data.detail;
-      }
+      errorMsg = Array.isArray(error.response.data.detail)
+        ? error.response.data.detail.map((err: any) => err.msg).join('; ')
+        : error.response.data.detail;
     }
     throw new Error(errorMsg);
   }
