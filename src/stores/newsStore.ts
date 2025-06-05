@@ -4,16 +4,16 @@ import { getNewsList } from '@/services/news';
 
 export const useNewsStore = defineStore('news', {
   state: () => ({
-    news: [] as NewsItem[],
+    newsList: [] as NewsItem[], // 确保初始化为空数组
     currentNews: null as NewsItem | null,
-    total: 0 // 添加总条数字段
+    total: 0
   }),
   actions: {
     async fetchNews(params: any) {
       try {
         const response = await getNewsList(params);
-        this.news = response.data.items;
-        this.total = response.data.total;
+        this.newsList = response.data.items;
+        this.total = parseInt(response.headers['x-total-count']); // 从headers获取总条数
       } catch (error) {
         console.error('获取新闻列表失败', error);
       }

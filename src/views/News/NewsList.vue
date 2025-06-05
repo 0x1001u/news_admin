@@ -49,9 +49,10 @@
         </table>
         <RecycleScroller
           class="scroller"
-          :items="newsStore.news"
+          :items="newsStore.newsList"
           :item-size="72"
           key-field="id"
+          v-loading="loading"
         >
           <template v-slot="{ item }">
             <tr>
@@ -76,13 +77,14 @@
           </template>
         </RecycleScroller>
       </div>
+      <el-empty v-if="!loading && newsStore.newsList.length === 0" description="暂无数据" />
 
       <el-pagination
         v-model:current-page="queryParams.page"
         :page-size="queryParams.per_page"
         layout="total, prev, pager, next"
         :total="newsStore.total"
-        @current-change="fetchData"
+        @current-change="handlePageChange"
       />
     </el-card>
   </div>
@@ -116,6 +118,7 @@ export default defineComponent({
     const router = useRouter();
     const newsStore = useNewsStore();
     const categories = ref<{id: number; name: string}[]>([]);
+    const loading = ref(false);
     
     const queryParams = reactive({
       page: 1,
@@ -129,11 +132,19 @@ export default defineComponent({
     });
 
     const fetchData = async () => {
+      loading.value = true;
       try {
         await newsStore.fetchNews(queryParams);
       } catch (error) {
         ElMessage.error('获取新闻列表失败');
+      } finally {
+        loading.value = false;
       }
+    };
+
+    const handlePageChange = (newPage: number) => {
+      queryParams.page = newPage;
+      fetchData();
     };
 
     const fetchCategories = async () => {
@@ -195,7 +206,9 @@ export default defineComponent({
       handleDelete,
       toggleStatus,
       statusTagType,
-      formatStatus
+      loading,
+      formatStatus,
+      handlePageChange
     };
   }
 });
