@@ -12,6 +12,7 @@ export interface NewsItem {
 export interface NewsQueryParams {
   page?: number;
   limit?: number;
-  status?: string;
-  category?: number;
+  title?: string;
+  category?: number | null; // 允许null
+  status?: 'draft' | 'published' | 'archived' | null; // 允许null
 }

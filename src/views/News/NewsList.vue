@@ -37,7 +37,7 @@
               <td>{{ item.title }}</td>
               <td>{{ item.category?.name }}</td>
               <td>
-                <el-tag :type="statusTagType(item.status)">{{ item.status | statusText }}</el-tag>
+                <el-tag :type="statusTagType(item.status)">{{ formatStatus(item.status) }}</el-tag>
               </td>
               <td>{{ item.published_at }}</td>
               <td>
@@ -66,21 +66,48 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { getNewsList, deleteNews, updateNewsStatus } from '@/services/news';
 import { getCategories } from '@/services/categories';
 
+// 新闻状态文本格式化
+const formatStatus = (status: string) => {
+  switch (status) {
+    case 'draft':
+      return '草稿';
+    case 'published':
+      return '已发布';
+    case 'archived':
+      return '已归档';
+    default:
+      return status;
+  }
+};
+
+// 新闻状态文本过滤器
+const statusText = (status: string) => {
+  switch (status) {
+    case 'draft':
+      return '草稿';
+    case 'published':
+      return '已发布';
+    case 'archived':
+      return '已归档';
+    default:
+      return status;
+  }
+};
+
 export default defineComponent({
   name: 'NewsList',
   setup() {
     const router = useRouter();
     const list = ref([]);
     const total = ref(0);
-    const categories = ref([]);
+    const categories = ref<{id: number; name: string}[]>([]);
     
     const listQuery = reactive({
       page: 1,
-      limit: 500,
+      limit: 20, // 默认20条
       title: '',
-      category: '',
-      status: '',
-      tags: []
+      category: null, // 使用null代替空字符串
+      status: null // 使用null代替空字符串
     });
 
     const fetchData = async () => {
@@ -154,24 +181,9 @@ export default defineComponent({
       handleDelete,
       toggleStatus,
       handlePageChange,
-      statusTagType
+      statusTagType,
+      formatStatus
     };
-  },
-  filters: {
-    statusText(status: string) {
-// 性能验证说明：
-  // 1. 确保后端API支持返回500条数据
-  // 2. 在浏览器开发者工具中打开Performance面板
-  // 3. 滚动列表并记录性能指标
-  // 4. 重点关注FPS、布局和渲染时间
-  // 5. 与未使用虚拟滚动前进行对比
-      const statusMap: Record<string, string> = {
-        draft: '草稿',
-        published: '已发布',
-        archived: '已归档'
-      };
-      return statusMap[status] || status;
-    }
   }
 });
 </script>

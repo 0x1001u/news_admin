@@ -3,14 +3,26 @@ import type { NewsItem, NewsQueryParams } from '@/types';
 import type { ApiResponse } from '@/types';
 
 // 获取新闻列表
-export const getNewsList = async (
-  params: NewsQueryParams
-): Promise<ApiResponse<NewsItem[]>> => {
+export const getNewsList = async (params: NewsQueryParams = {}) => {
+  // 设置默认值并过滤无效参数
+  const queryParams: Record<string, any> = {
+    page: params.page || 1,
+    limit: params.limit || 20,
+    ...params
+  };
+  
+  // 移除空值参数
+  Object.keys(queryParams).forEach(key => {
+    if (queryParams[key] === '' || queryParams[key] === null) {
+      delete queryParams[key];
+    }
+  });
+
   try {
-    const response = await api.get('/news', { params });
+    const response = await api.get('/news', { params: queryParams });
     return response.data;
   } catch (error) {
-    throw new Error('Failed to fetch news');
+    throw new Error('获取新闻列表失败');
   }
 };
 
