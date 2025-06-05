@@ -28,5 +28,4 @@ interface Pagination {
 
 export interface NewsListResponse {
   data: NewsItem[];
-  pagination: Pagination;
 }

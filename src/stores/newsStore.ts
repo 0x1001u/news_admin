@@ -13,14 +13,15 @@ export const useNewsStore = defineStore('news', {
       try {
         const response = await getNewsList(params);
         
-        // 根据文档结构处理响应
-        if (response.data && response.data.pagination) {
-          this.newsList = response.data.data;
-          this.total = response.data.pagination.total;
-        } else {
-          // 兼容旧结构
-          this.newsList = response.data.data || response.data;
-          this.total = response.data.total || 0;
+        // 直接使用响应数据（无分页字段）
+        this.newsList = response.data.data;
+        
+        // 尝试从响应头获取总条数
+        this.total = parseInt(response.headers['x-total-count'] || '0', 10);
+        
+        // 如果响应头没有，使用数组长度作为临时方案
+        if (!this.total && Array.isArray(response.data.data)) {
+          this.total = response.data.data.length;
         }
       } catch (error) {
         console.error('获取新闻列表失败:', error);

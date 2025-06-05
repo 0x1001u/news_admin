@@ -27,8 +27,8 @@ export const getNewsList = async (params: NewsQueryParams = {}) => {
   });
 
   try {
-    const response = await api.get&lt;NewsListResponse&gt;('/api/v1/news', { params: queryParams });
-    return response.data;
+    const response = await api.get<NewsListResponse>('/news', { params: queryParams });
+    return response;
   } catch (error) {
     throw new Error('获取新闻列表失败');
   }
