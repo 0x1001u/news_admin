@@ -53,3 +53,25 @@ export const updateMe = async (data: { username?: string; email?: string; passwo
   const response = await api.put('/auth/me', data);
   return response.data;
 };
+
+// 验证Token
+export const verifyToken = async () => {
+  try {
+    const response = await api.get('/auth/me');
+    return response.data;
+  } catch (error) {
+    throw new Error('Token verification failed');
+  }
+};
+
+// 添加Token刷新方法
+export const refreshToken = async () => {
+  try {
+    const response = await api.post('/api/v1/auth/refresh', {
+      refresh_token: localStorage.getItem('refresh_token')
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Token refresh failed');
+  }
+};

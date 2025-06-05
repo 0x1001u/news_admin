@@ -152,7 +152,7 @@ export default defineComponent({
     const token = computed(() => authStore.token);
     const uploadImageUrl = computed(() => {
       if (!form.id) return '';
-      return `/api/v1/news/${form.id}/upload-image`;
+      return `/news/${form.id}/upload-image`;
     });
     
     const fetchNews = async (id: string) => {

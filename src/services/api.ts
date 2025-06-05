@@ -15,18 +15,33 @@ const api = axios.create({
 });
 
 // 请求拦截器：添加token
+import { useAuthStore } from '@/stores/auth';
+
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authStore = useAuthStore();
+  if (authStore.token) {
+    // Normalize token type (capitalize first letter)
+    const tokenType = authStore.tokenType
+      ? authStore.tokenType.charAt(0).toUpperCase() + authStore.tokenType.slice(1).toLowerCase()
+      : 'Bearer';
+    const header = `${tokenType} ${authStore.token}`;
+    console.debug('[API] Setting Authorization header:', header);
+    config.headers.Authorization = header;
+  } else {
+    console.warn('[API] No token available for request');
   }
   return config;
 }, error => {
+  console.error('[API] Request interceptor error:', error);
   return Promise.reject(error);
 });
 
 // 响应拦截器：处理401错误
-api.interceptors.response.use(response => response, error => {
+api.interceptors.response.use(response => {
+  console.debug('[API] Successful response:', response.config.url, response.status);
+  return response;
+}, error => {
+  console.error('[API] Response error:', error.config?.url, error.response?.status, error.message);
   if (error.response?.status === 401) {
     localStorage.removeItem('token');
     // 使用原生跳转避免路由依赖

@@ -134,6 +134,13 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Comments/CommentDetail.vue'),
         meta: { requiresAuth: true },
         props: true
+      },
+      // 添加认证调试页面
+      {
+        path: '/auth/debug',
+        name: 'AuthDebug',
+        component: () => import('@/views/Auth/Debug.vue'),
+        meta: { requiresAuth: false }
       }
     ]
   },
@@ -155,7 +162,7 @@ router.beforeEach(async (to, from, next) => {
   
   // 确保用户状态是最新的
   if (!authStore.userData && authStore.token) {
-    await authStore.fetchUser()
+    await authStore.fetchCurrentUser()
   }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
@@ -165,7 +172,7 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Dashboard' });
   } else if (to.meta.requiresAdmin && authStore.userData?.role !== 'admin') {
     next('/dashboard')
-  } else if (to.meta.roles) {
+  } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
     // 添加角色检查
     const userRole = authStore.userData?.role || 'guest'
     if (!to.meta.roles.includes(userRole)) {

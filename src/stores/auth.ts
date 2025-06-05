@@ -16,13 +16,27 @@ export const useAuthStore = defineStore('auth', () => {
   const actions = {
     async login(credentials: { email: string; password: string }) {
       try {
-        const tokenData = await loginService(credentials) as Token;
-        token.value = tokenData.access_token;
-        tokenType.value = tokenData.token_type; // 存储token_type
-        await actions.fetchUser();
-        router.push({ name: 'Dashboard' });
+        const tokenData = await loginService(credentials);
+        console.info('[Auth] Login successful. Token data:', tokenData);
+        
+        token.value = tokenData.token;
+        tokenType.value = 'Bearer'; // 默认类型
+        console.debug('[Auth] Token stored:', token.value);
+        
+        // 立即验证Token
+        try {
+          const user = await actions.fetchCurrentUser();
+          console.info('[Auth] User fetched successfully:', user);
+          router.push({ name: 'Dashboard' });
+          return user;
+        } catch (error) {
+          console.error('[Auth] User fetch failed:', error);
+          throw new Error('User verification failed');
+        }
       } catch (error) {
-        console.error('Login failed:', error);
+        console.error('[Auth] Login failed:', error);
+        token.value = null;
+        tokenType.value = null;
         throw error;
       }
     },
@@ -31,13 +45,13 @@ export const useAuthStore = defineStore('auth', () => {
       tokenType.value = null; // 清除token_type
       state.userData = null;
     },
-    async fetchUser() {
+    async fetchCurrentUser() {
       if (!token.value) return;
       try {
         const userData = await getMe();
         state.userData = userData as User;
       } catch (error) {
-        console.error('Failed to fetch user:', error);
+        console.error('Failed to fetch current user:', error);
         throw error;
       }
     }
@@ -50,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
     ...actions,
     token,
     tokenType, // 返回tokenType
-    isAuthenticated
+    isAuthenticated,
+    fetchCurrentUser: actions.fetchCurrentUser
   };
 });
