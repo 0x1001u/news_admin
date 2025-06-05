@@ -11,8 +11,11 @@ export interface NewsItem {
 
 export interface NewsQueryParams {
   page?: number;
-  limit?: number;
+  per_page?: number;
   title?: string;
-  category?: number | null; // 允许null
-  status?: 'draft' | 'published' | 'archived' | null; // 允许null
+  category_id?: number | null;
+  status?: 'draft' | 'published' | 'archived' | null;
+  tag_id?: number;
+  sort_by?: 'published_at' | 'view_count';
+  sort_order?: 'asc' | 'desc';
 }

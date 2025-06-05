@@ -4,12 +4,20 @@ import type { ApiResponse } from '@/types';
 
 // 获取新闻列表
 export const getNewsList = async (params: NewsQueryParams = {}) => {
-  // 设置默认值并过滤无效参数
-  const queryParams: Record<string, any> = {
-    page: params.page || 1,
-    limit: params.limit || 20,
-    ...params
+  // 设置默认参数
+  const defaultParams = {
+    page: 1,
+    per_page: 20,
+    status: 'published',
+    sort_by: 'published_at',
+    sort_order: 'desc'
   };
+  
+  // 合并参数
+  const mergedParams = { ...defaultParams, ...params };
+  
+  // 构建查询参数对象
+  const queryParams: Record<string, any> = { ...mergedParams };
   
   // 移除空值参数
   Object.keys(queryParams).forEach(key => {

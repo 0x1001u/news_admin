@@ -2,16 +2,37 @@
   <div class="news-list">
     <el-card>
       <div class="filter-container">
-        <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" />
-        <el-select v-model="listQuery.category" placeholder="分类" clearable>
-          <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-        <el-select v-model="listQuery.status" placeholder="状态" clearable>
-          <el-option label="草稿" value="draft" />
-          <el-option label="已发布" value="published" />
-          <el-option label="已归档" value="archived" />
-        </el-select>
-        <el-button type="primary" @click="fetchData">查询</el-button>
+        <el-row :gutter="20" class="filter-bar">
+          <el-col :span="6">
+            <el-input v-model="queryParams.title" placeholder="标题" style="width: 200px;" />
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="queryParams.category_id" placeholder="分类" clearable>
+              <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="queryParams.tag_id" placeholder="标签" clearable>
+              <!-- TODO: 添加标签选项 -->
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="queryParams.status" placeholder="状态" clearable>
+              <el-option label="已发布" value="published" />
+              <el-option label="草稿" value="draft" />
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row class="sort-bar">
+          <el-radio-group v-model="queryParams.sort_by">
+            <el-radio-button label="published_at">发布时间</el-radio-button>
+            <el-radio-button label="view_count">浏览量</el-radio-button>
+          </el-radio-group>
+          <el-radio-group v-model="queryParams.sort_order">
+            <el-radio-button label="desc">降序</el-radio-button>
+            <el-radio-button label="asc">升序</el-radio-button>
+          </el-radio-group>
+        </el-row>
       </div>
 
       <div class="table-container">
@@ -28,7 +49,7 @@
         </table>
         <RecycleScroller
           class="scroller"
-          :items="list"
+          :items="newsStore.news"
           :item-size="72"
           key-field="id"
         >
@@ -55,33 +76,28 @@
           </template>
         </RecycleScroller>
       </div>
+
+      <el-pagination
+        v-model:current-page="queryParams.page"
+        :page-size="queryParams.per_page"
+        layout="total, prev, pager, next"
+        :total="newsStore.total"
+        @current-change="fetchData"
+      />
     </el-card>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from 'vue';
+import { defineComponent, reactive, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getNewsList, deleteNews, updateNewsStatus } from '@/services/news';
+import { deleteNews, updateNewsStatus } from '@/services/news';
 import { getCategories } from '@/services/categories';
+import { useNewsStore } from '@/stores/newsStore';
 
 // 新闻状态文本格式化
 const formatStatus = (status: string) => {
-  switch (status) {
-    case 'draft':
-      return '草稿';
-    case 'published':
-      return '已发布';
-    case 'archived':
-      return '已归档';
-    default:
-      return status;
-  }
-};
-
-// 新闻状态文本过滤器
-const statusText = (status: string) => {
   switch (status) {
     case 'draft':
       return '草稿';
@@ -98,23 +114,23 @@ export default defineComponent({
   name: 'NewsList',
   setup() {
     const router = useRouter();
-    const list = ref([]);
-    const total = ref(0);
+    const newsStore = useNewsStore();
     const categories = ref<{id: number; name: string}[]>([]);
     
-    const listQuery = reactive({
+    const queryParams = reactive({
       page: 1,
-      limit: 20, // 默认20条
+      per_page: 20,
       title: '',
-      category: null, // 使用null代替空字符串
-      status: null // 使用null代替空字符串
+      category_id: null as number | null,
+      tag_id: null as number | null,
+      status: 'published' as 'published' | 'draft' | 'archived' | null,
+      sort_by: 'published_at' as 'published_at' | 'view_count',
+      sort_order: 'desc' as 'asc' | 'desc'
     });
 
     const fetchData = async () => {
       try {
-        const response = await getNewsList(listQuery);
-        list.value = response.data.items;
-        total.value = response.data.total;
+        await newsStore.fetchNews(queryParams);
       } catch (error) {
         ElMessage.error('获取新闻列表失败');
       }
@@ -152,11 +168,6 @@ export default defineComponent({
       fetchData();
     };
 
-    const handlePageChange = (page: number) => {
-      listQuery.page = page;
-      fetchData();
-    };
-
     const statusTagType = (status: string) => {
       switch (status) {
         case 'published': return 'success';
@@ -171,16 +182,18 @@ export default defineComponent({
       fetchCategories();
     });
 
+    watch(queryParams, () => {
+      fetchData();
+    }, { deep: true });
+
     return {
-      list,
-      total,
       categories,
-      listQuery,
+      queryParams,
+      newsStore,
       fetchData,
       handleEdit,
       handleDelete,
       toggleStatus,
-      handlePageChange,
       statusTagType,
       formatStatus
     };
