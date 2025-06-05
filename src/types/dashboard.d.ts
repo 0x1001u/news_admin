@@ -5,10 +5,10 @@ export interface ApiResponse<T> {
 }
 
 export interface DashboardStats {
-  newsCount: number;
   userCount: number;
-  commentCount: number;
+  newsCount: number;
   categoryCount: number;
+  tagCount: number;
 }
 
 export interface Activity {
