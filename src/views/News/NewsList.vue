@@ -77,7 +77,10 @@
           </template>
         </RecycleScroller>
       </div>
-      <el-empty v-if="!loading && newsStore.newsList.length === 0" description="暂无数据" />
+      <el-empty
+        v-if="!loading && (!newsStore.newsList || newsStore.newsList.length === 0)"
+        description="暂无数据"
+      />
 
       <el-pagination
         v-model:current-page="queryParams.page"
@@ -136,7 +139,8 @@ export default defineComponent({
       try {
         await newsStore.fetchNews(queryParams);
       } catch (error) {
-        ElMessage.error('获取新闻列表失败');
+        console.error('加载新闻失败:', error);
+        ElMessage.error('加载新闻失败');
       } finally {
         loading.value = false;
       }
