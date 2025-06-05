@@ -138,6 +138,9 @@ export default defineComponent({
       loading.value = true;
       try {
         await newsStore.fetchNews(queryParams);
+        // 临时输出存储状态
+        console.log('新闻列表:', newsStore.newsList);
+        console.log('总数:', newsStore.total);
       } catch (error) {
         console.error('加载新闻失败:', error);
         ElMessage.error('加载新闻失败');

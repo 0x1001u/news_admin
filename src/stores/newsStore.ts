@@ -12,11 +12,18 @@ export const useNewsStore = defineStore('news', {
     async fetchNews(params: any) {
       try {
         const response = await getNewsList(params);
-        this.newsList = response.data.data; // 访问 data.data
-        this.total = response.data.pagination.total; // 从分页对象获取总数
+        
+        // 根据文档结构处理响应
+        if (response.data && response.data.pagination) {
+          this.newsList = response.data.data;
+          this.total = response.data.pagination.total;
+        } else {
+          // 兼容旧结构
+          this.newsList = response.data.data || response.data;
+          this.total = response.data.total || 0;
+        }
       } catch (error) {
         console.error('获取新闻列表失败:', error);
-        // 确保在错误时清空列表
         this.newsList = [];
         this.total = 0;
       }

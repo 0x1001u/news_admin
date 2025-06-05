@@ -35,6 +35,8 @@ api.interceptors.request.use(config => {
 // 恢复响应拦截器
 api.interceptors.response.use(response => {
   console.debug('[API] 响应成功:', response.config.url, response.status);
+  // 添加响应拦截器记录完整响应（用于调试）
+  console.log('[API Response]', response);
   return response;
 }, error => {
   console.error('[API] 响应错误:', error.message);

@@ -1,5 +1,5 @@
 import api from './api';
-import type { NewsItem, NewsQueryParams } from '@/types';
+import type { NewsItem, NewsQueryParams, NewsListResponse } from '@/types';
 import type { ApiResponse } from '@/types';
 
 // 获取新闻列表
@@ -27,7 +27,7 @@ export const getNewsList = async (params: NewsQueryParams = {}) => {
   });
 
   try {
-    const response = await api.get('/news', { params: queryParams });
+    const response = await api.get&lt;NewsListResponse&gt;('/api/v1/news', { params: queryParams });
     return response.data;
   } catch (error) {
     throw new Error('获取新闻列表失败');

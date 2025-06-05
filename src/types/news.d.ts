@@ -19,3 +19,14 @@ export interface NewsQueryParams {
   sort_by?: 'published_at' | 'view_count';
   sort_order?: 'asc' | 'desc';
 }
+
+interface Pagination {
+  page: number;
+  per_page: number;
+  total: number;
+}
+
+export interface NewsListResponse {
+  data: NewsItem[];
+  pagination: Pagination;
+}
