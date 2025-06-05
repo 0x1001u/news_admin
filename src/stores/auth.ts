@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { reactive, toRefs, computed } from 'vue';
 import { useStorage } from '@vueuse/core';
+import axios from 'axios'; // 导入axios以使用isAxiosError
 import type { AuthState, User } from '@/types';
 import type { Token } from '@/types/auth';
 import { login as loginService, getMe } from '@/services/auth';
@@ -56,12 +57,27 @@ export const useAuthStore = defineStore('auth', () => {
       state.userData = null;
     },
     async fetchCurrentUser() {
-      if (!token.value) return;
+      // 确保token存在且不为空
+      if (!token.value || token.value.trim() === '') {
+        console.warn('[Auth] fetchCurrentUser: Token为空或未定义');
+        return;
+      }
+      
       try {
+        console.debug('[Auth] 获取用户信息，使用Token:', token.value.slice(0, 8) + '****');
         const userData = await getMe();
         state.userData = userData as User;
-      } catch (error) {
-        console.error('Failed to fetch current user:', error);
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) { // 使用axios.isAxiosError
+          console.error('[Auth] 获取用户信息失败:', error.response?.data || error.message);
+          if (error.response?.status === 401) {
+            console.warn('[Auth] Token可能已失效，尝试刷新');
+          }
+        } else if (error instanceof Error) {
+          console.error('[Auth] 获取用户信息失败:', error.message);
+        } else {
+          console.error('[Auth] 获取用户信息失败: 未知错误');
+        }
         throw error;
       }
     }

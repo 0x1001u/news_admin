@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { ApiResponse, DashboardStats, Activity } from '@/types';
+import { useAuthStore } from '@/stores/auth';
 
 declare global {
   interface Window {
@@ -14,49 +15,32 @@ const api = axios.create({
   }
 });
 
-// 请求拦截器：添加token
-/*
-import { useAuthStore } from '@/stores/auth';
-
+// 恢复请求拦截器
 api.interceptors.request.use(config => {
   const authStore = useAuthStore();
   if (authStore.token) {
-    // Normalize token type (capitalize first letter)
+    // 规范化Token类型
     const tokenType = authStore.tokenType
       ? authStore.tokenType.charAt(0).toUpperCase() + authStore.tokenType.slice(1).toLowerCase()
       : 'Bearer';
-    const header = `${tokenType} ${authStore.token}`;
-    console.debug('[API] Setting Authorization header:', header);
-    config.headers.Authorization = header;
-  } else {
-    console.warn('[API] No token available for request');
+      
+    config.headers.Authorization = `${tokenType} ${authStore.token}`;
+    console.debug('[API] 设置Authorization头:', config.headers.Authorization);
   }
   return config;
 }, error => {
-  console.error('[API] Request interceptor error:', error);
   return Promise.reject(error);
 });
 
-// 响应拦截器：处理401错误
+// 恢复响应拦截器
 api.interceptors.response.use(response => {
-  console.debug(`[API] 响应成功: ${response.status} ${response.config.url}`);
-  
-  // 记录登录响应结构
-  if (response.config.url?.includes('/auth/login')) {
-    console.debug('[API] 登录响应结构:', JSON.stringify(response.data));
-  }
-  
+  console.debug('[API] 响应成功:', response.config.url, response.status);
   return response;
 }, error => {
-  console.error('[API] Response error:', error.config?.url, error.response?.status, error.message);
-  if (error.response?.status === 401) {
-    localStorage.removeItem('token');
-    // 使用原生跳转避免路由依赖
-    window.location.href = '/login';
-  }
+  console.error('[API] 响应错误:', error.message);
   return Promise.reject(error);
 });
-*/
+
 
 export default api;
 // 获取仪表盘统计数据
