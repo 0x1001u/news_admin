@@ -11,29 +11,40 @@ export const registerUser = async (data: { username: string; email: string; pass
 export const login = async (credentials: { username: string; password: string }): Promise<Token> => {
   try {
     const params = new URLSearchParams();
-    // 精确匹配curl参数
-    params.append('grant_type', ''); // 空值
+    params.append('grant_type', '');
     params.append('username', credentials.username);
     params.append('password', credentials.password);
-    params.append('scope', ''); // 空值
-    params.append('client_id', ''); // 空值
-    params.append('client_secret', ''); // 空值
+    params.append('scope', '');
+    params.append('client_id', '');
+    params.append('client_secret', '');
     
+    // 绕过拦截器直接获取原始响应
     const response = await api.post('/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      },
+      transformResponse: [(data) => data] // 禁用默认JSON解析
     });
     
-// 严格验证响应结构
-    if (!response.data.access_token) {
-      console.error('登录响应缺少access_token:', response.data);
+    console.debug('[Auth] 原始响应数据:', response.data);
+    
+    // 手动解析JSON
+    let responseData;
+    try {
+      responseData = JSON.parse(response.data);
+    } catch (error) {
+      console.error('[Auth] JSON解析失败:', error);
+      throw new Error('响应格式无效');
+    }
+    
+    if (!responseData.access_token) {
+      console.error('[Auth] 响应缺少access_token:', responseData);
       throw new Error('登录响应缺少access_token');
     }
-    // Map the response to the Token interface
+    
     return {
-      access_token: response.data.token,
-      token_type: response.data.token_type || 'bearer'
+      access_token: responseData.access_token,
+      token_type: responseData.token_type || 'bearer'
     };
   } catch (error: any) {
     // 错误处理保持不变

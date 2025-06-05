@@ -15,6 +15,7 @@ const api = axios.create({
 });
 
 // 请求拦截器：添加token
+/*
 import { useAuthStore } from '@/stores/auth';
 
 api.interceptors.request.use(config => {
@@ -55,6 +56,7 @@ api.interceptors.response.use(response => {
   }
   return Promise.reject(error);
 });
+*/
 
 export default api;
 // 获取仪表盘统计数据

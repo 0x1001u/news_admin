@@ -17,7 +17,12 @@ export const useAuthStore = defineStore('auth', () => {
     async login(credentials: { email: string; password: string }) {
       try {
         const tokenData = await loginService(credentials);
-        console.info('[Auth] 原始Token数据:', tokenData);
+        console.info('[Auth] 服务返回Token数据:', tokenData);
+        
+        // 验证数据类型
+        if (typeof tokenData !== 'object' || tokenData === null) {
+          throw new Error(`无效的Token数据类型: ${typeof tokenData}`);
+        }
         
         // 确保access_token存在
         if (!tokenData.access_token) {
