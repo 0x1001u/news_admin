@@ -3,10 +3,10 @@ import api from '@/services/api';
 export const getDashboardStats = async () => {
   try {
     const [usersRes, newsRes, categoriesRes, tagsRes] = await Promise.all([
-      api.get('/api/v1/users/'),
-      api.get('/api/v1/news'),
-      api.get('/api/v1/categories/'),
-      api.get('/api/v1/tags/')
+      api.get('/users/'),
+      api.get('/news'),
+      api.get('/categories/'),
+      api.get('/tags/')
     ]);
     
     return {

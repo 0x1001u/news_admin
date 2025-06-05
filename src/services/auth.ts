@@ -87,7 +87,7 @@ export const verifyToken = async () => {
 // 添加Token刷新方法
 export const refreshToken = async () => {
   try {
-    const response = await api.post('/api/v1/auth/refresh', {
+    const response = await api.post('/auth/refresh', {
       refresh_token: localStorage.getItem('refresh_token')
     });
     return response.data;
