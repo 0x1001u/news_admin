@@ -25,7 +25,16 @@ export const login = async (credentials: { username: string; password: string })
       }
     });
     
-    return response.data;
+// 严格验证响应结构
+    if (!response.data.access_token) {
+      console.error('登录响应缺少access_token:', response.data);
+      throw new Error('登录响应缺少access_token');
+    }
+    // Map the response to the Token interface
+    return {
+      access_token: response.data.token,
+      token_type: response.data.token_type || 'bearer'
+    };
   } catch (error: any) {
     // 错误处理保持不变
     let errorMsg = 'Login failed';

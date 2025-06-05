@@ -17,24 +17,29 @@ export const useAuthStore = defineStore('auth', () => {
     async login(credentials: { email: string; password: string }) {
       try {
         const tokenData = await loginService(credentials);
-        console.info('[Auth] Login successful. Token data:', tokenData);
+        console.info('[Auth] 原始Token数据:', tokenData);
         
-        token.value = tokenData.token;
-        tokenType.value = 'Bearer'; // 默认类型
-        console.debug('[Auth] Token stored:', token.value);
+        // 确保access_token存在
+        if (!tokenData.access_token) {
+          throw new Error('登录服务未返回access_token');
+        }
+        
+        token.value = tokenData.access_token;
+        tokenType.value = tokenData.token_type || 'Bearer'; // 使用响应中的token_type
+        console.info('[Auth] Token存储成功:', token.value.slice(0, 8) + '****');
         
         // 立即验证Token
         try {
           const user = await actions.fetchCurrentUser();
-          console.info('[Auth] User fetched successfully:', user);
+          console.info('[Auth] 用户信息获取成功:', user);
           router.push({ name: 'Dashboard' });
           return user;
         } catch (error) {
-          console.error('[Auth] User fetch failed:', error);
-          throw new Error('User verification failed');
+          console.error('[Auth] 用户信息获取失败:', error);
+          throw new Error('用户验证失败');
         }
       } catch (error) {
-        console.error('[Auth] Login failed:', error);
+        console.error('[Auth] 登录流程失败:', error);
         token.value = null;
         tokenType.value = null;
         throw error;

@@ -38,7 +38,13 @@ api.interceptors.request.use(config => {
 
 // 响应拦截器：处理401错误
 api.interceptors.response.use(response => {
-  console.debug('[API] Successful response:', response.config.url, response.status);
+  console.debug(`[API] 响应成功: ${response.status} ${response.config.url}`);
+  
+  // 记录登录响应结构
+  if (response.config.url?.includes('/auth/login')) {
+    console.debug('[API] 登录响应结构:', JSON.stringify(response.data));
+  }
+  
   return response;
 }, error => {
   console.error('[API] Response error:', error.config?.url, error.response?.status, error.message);
